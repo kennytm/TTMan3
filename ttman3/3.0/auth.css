@@ -1,0 +1,12 @@
+#auth-table {
+	width: 100%;
+}
+
+#auth-table th {
+	text-align: right;
+	width: 30%;
+}
+
+#auth-password, #auth-username {
+	width: 100%;
+}

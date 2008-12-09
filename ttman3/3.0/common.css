@@ -1,0 +1,255 @@
+.not-important {
+	color: gray;
+}
+
+#temp-table-area {
+	display: none;
+}
+
+/******* COPIED FROM v8.9.3 ********/
+
+html {
+	font-family: 'Lucida Grande', 'Bitstream Vera Sans', Helvetica, Arial, sans-serif;
+	font-size: 13.6px;
+	font-size-adjust: 0.54;
+}
+
+input[type="text"] { font-size: 0.75em; }
+
+.detail-button {
+	-moz-user-focus:ignore;
+	background-color:white;
+	border:1px solid white;
+	color:#8080FF;
+	cursor:pointer;
+	font-size:1em;
+	font-weight:normal;
+	padding:1px;
+}
+
+.detail-button:hover {
+	border-color: navy;
+	background-color: #CCCCFF;
+	color: blue;
+}
+
+.detail-button:active {
+	border-color: maroon;
+	background-color: #FFCCCC;
+	color: red;
+}
+
+img, input {
+	vertical-align: middle;
+}
+
+.detail-button::-moz-focus-inner { border: none; }
+.detail-button[disabled] {
+	color: #808080;
+	opacity: 0.25;
+	filter: alpha(opacity=25);
+}
+
+
+.mouseovertable {
+	border: 1px solid gray;
+	margin: auto;
+}
+
+.mouseovertable th { text-align: center; }
+
+.info-table {
+	border-style: none;
+	border-collapse: collapse;
+	width: 100%;
+}
+
+.info-table th, .info-table td, #course-waitlist-header th { border: 1px solid gray; }
+
+#course-list-container {
+	height: 360px;
+	width: 180px;
+	overflow-y: auto;
+	padding: 0em;
+	display: block;
+}
+
+#course-list td {  white-space: nowrap; }
+
+#preferred-sections-table td {
+	vertical-align: middle;
+}
+#preferred-sections-row { vertical-align: top; }
+#preferred-sections-list { height: 255px; }
+
+.mouseovertable:hover { background-color: #FFFFEE; }
+.mouseovertable tr:hover { background-color: #FFFFCC; }
+
+th, td { vertical-align: top; }
+th { text-align: right; }
+
+#tooltip, #collisiontip, #enrolledtip {
+	position: absolute;
+	visibility: hidden;
+	border: 1px solid black;
+	background-color: white;
+	color: black;
+	font-size: 0.9em;
+	opacity: 0.9;
+	padding: 0.15em;
+	z-index: 2000;
+	-webkit-box-shadow: 0.2em 0.2em 0.4em rgba(0,0,0,0.5);
+	box-shadow: 0.2em 0.2em 0.4em rgba(0,0,0,0.5);
+}
+
+#collisiontip { background-color: #FFECEC; }
+#enrolledtip { background-color: #CCFFCC; }
+
+#main-table {
+	width: 100%;
+	height: 395px;
+}
+
+#first-column { width: 180px; }
+#second-column { width: 285px; }
+
+.addwaitheader { text-align: right; font-weight: bold; }
+
+#course-waitlist-container, #dept-courses-container {
+	overflow-y: auto;
+	overflow-x: hidden;
+	border: 1px solid black;
+}
+
+#course-waitlist-header {
+	border-collapse: collapse;
+	margin-left: 1px;
+}
+
+.highlighted { color: black; background-color: #FFFFCC; }
+.highlightable:hover { text-decoration: underline; }
+#course-info-row { font-weight: bold; }
+#course-description-row td {
+	padding: 1em;
+	text-align: justify;
+}
+
+#dept-courses-container {
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+
+.dept-redundant {
+	color: #808080;
+	font-size: smaller;
+}
+
+.dept-redundant-plain { font-size: smaller; }
+
+.cc-id .dept-redundant { color: #4040C0; }
+.cc-id {
+	color: navy;
+	cursor: pointer;
+}
+
+.cc-id:hover { text-decoration: underline; }
+
+#dept-courses-table .course-enrolled-indicator, #dept-courses-table .course-collision-indicator {
+	margin-left: 1em;
+}
+
+.course-collision-indicator { color: #C04040; }
+.course-collision-indicator .dept-redundant { color: #FF8080; }
+.course-enrolled-indicator { color: #408040; }
+.course-enrolled-indicator .dept-redundant { color: #40C040; }
+
+tfoot { color: silver; }
+
+#mode-label-container { width: 53px; }
+
+#course-list-header { width: 100%; }
+#course-list-header th { text-align: left; }
+#course-list-header td { text-align: right; }
+
+.small-table { width: 100%; }
+.small-table tr { height: 0.25em; }
+
+.small-table, .detailed-table {
+	border: 1px solid black;
+	border-collapse: collapse;
+}
+
+.small-table th, .small-table td {
+	vertical-align: middle;
+	text-align: center;
+}
+
+.small-table td { padding-bottom: 0em!important; }
+.combin-table { width: 100%; }
+.combin-table td {
+	text-align: left;
+}
+.combin-timetable-cell { width: 10%; }
+
+.desc-text {
+	font-size: 0.8em;
+	padding-bottom: 6ex;
+	width: 15%;
+	line-height: 3ex;
+}
+
+.filled { border: 1px solid black; }
+.nowrap { white-space: nowrap; }
+.not-enough-freespace, .too-much-waitlist { color: #FF8000; }
+
+.highlighted .course-collision-indicator { color: #C04040!important; }
+.highlighted .course-enrolled-indicator { color: #408040!important; }
+#course-waitlist-table .course-collision-indicator { color: #C04040; }
+#course-waitlist-table .course-enrolled-indicator { color: #408040; }
+#course-waitlist-table { color: black; }
+
+#iobox p { margin: 0.5em 0em; text-align: center; }
+#io-textarea { width: 95%; height: 105px; }
+
+.courselist-label, .cb-course-code { padding: 0em 0.25em; }
+
+#sections-manipulation-panel { text-align: center; }
+
+.ext-time { color: silver; }
+.hours { font-weight: bold; }
+
+#result-area li { padding-bottom: 1ex; }
+h2::before {
+	content: counter(section) '.  ';
+	color: #AAAAAA;
+}
+h2 {
+	counter-increment: section;
+	counter-reset: subsection;
+	padding-top: 3ex;
+}
+h3::before {
+	content: counter(section) "." counter(subsection) ". ";
+	color: #CCCCCC;
+}
+h3 {
+	counter-increment: subsection;
+	font-style: italic;
+}
+
+.toc-link { color: #EEEEFF; text-decoration: none; }
+h2:hover .toc-link { color: #CCCCFF; }
+.toc-link:hover { color: #8080FF!important; }
+
+
+#col2-toolbar-table {
+	width: 100%;
+	padding: 0em;
+}
+#col2-toolbar-table td {
+	padding: 0em;
+}
+#col2-toolbar-left { text-align: left; }
+#col2-toolbar-right { text-align: right; }
+
+#notes { width: 100%; }

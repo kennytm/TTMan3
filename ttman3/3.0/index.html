@@ -1,0 +1,208 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<title>HKUST Timetable Manager 2</title>
+<meta http-equiv="Content-Type" content="application/xhtml+xml; charset=utf-8" />
+
+<!--
+
+HKUST Timetable Manager 2
+Copyright (C) 2008  Kenny TM~ <ph_cckac@stu.ust.hk>
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+-->
+
+
+<link rel="stylesheet" type="text/css" href="common.css" />
+<link rel="stylesheet" type="text/css" href="blocksheet.css" />
+<link rel="stylesheet" type="text/css" href="tooltip.css" />
+<link rel="stylesheet" type="text/css" href="auth.css" />
+
+</head>
+<body>
+
+	<div id="main-area">
+		<table id="main-table">
+			<tr>
+				<td id="first-column">
+					<table id="course-list-header"><tr>
+						<th>Course list</th>
+						<td><button type="button" title="Show 0 timetables" id="show-timetables" name="show-timetables">
+							<img src="icons/timetable.png" alt="Timetable" /> &times; <span id="timetables-count">0</span>
+						</button></td>
+					</tr></table>
+					<div id="course-list-container" class="mouseovertable">
+						<table id="course-list">
+							<tr><td></td></tr>
+						</table>
+					</div>
+					<div>
+						<input disabled="disabled" type="image" src="icons/deleteall.png" id="clear-all-items" name="clear-all-items" alt="✘" title="Clear all items" class="detail-button" />
+						&emsp;
+						<input type="image" src="icons/io.png" id="io-course-list" name="io-course-list" alt="↹" title="Import/Export course list" class="detail-button" />
+						<input type="image" src="icons/enrolled.png" id="load-enrolled-courses" name="load-enrolled-courses" alt="®" title="Load confirmed enrollments" class="detail-button" />
+						<input type="image" src="icons/crs.png" id="goto-course-reg" name="goto-course-reg" alt="±" title="Go to official Course Registration System" class="detail-button" />
+						<input type="image" src="icons/randomcolor.png" id="randomize-bgc" name="randomize-bgc" alt="☯" title="Randomly assign background colors" class="detail-button" />
+					</div>
+				</td>
+				<td id="second-column">
+					<table>
+						<tr>
+							<th id="mode-label-container">
+								<label for="cc" id="mode-label">Course:</label>
+							</th>
+							<td>
+								<input name="cc" id="cc" value="PHYS" size="16" type="text" />
+								
+								<input type="image" src="icons/info.png" name="confirm-cc" id="confirm-cc" alt="?" title="Get detail of this course" class="detail-button" />
+								<input type="image" src="icons/add.png" name="add-course" id="add-course" alt="+" title="Add item" class="detail-button" />
+								<input type="image" src="icons/accept.png" name="update-course" id="update-course" alt="✓" title="Update selected item" class="detail-button" />
+								<input type="image" src="icons/delete.png" name="remove-course" id="remove-course" alt="✗" title="Remove selected item" class="detail-button" />
+							</td>
+						</tr>
+						<tr>
+							<td></td>
+							<td>
+								<select name="required-type" id="required-type">
+									<option value="required" selected="selected">Required</option>
+									<option value="ignorable">Ignorable</option>
+									<option value="audit">Audit</option>
+								</select>
+								<input name="hidden-course" id="hidden-course" value="hidden-course" type="checkbox" /><label for="hidden-course">Hidden</label>
+							</td>
+						</tr>
+						<tr><td colspan="2" id="sections-manipulation-panel">
+							<input type="image" src="icons/selectall.png" name="select-all-sections" id="select-all-sections" alt="■" title="Select all sections" class="detail-button" />
+							<input type="image" src="icons/selecttoggle.png" name="toggle-preferred-sections" id="toggle-preferred-sections" alt="□" title="Toggle checked sections" class="detail-button" />							
+							<input type="image" src="icons/selectnone.png" name="clear-all-sections" id="clear-all-sections" alt="□" title="Clear all sections" class="detail-button" />
+						</td></tr>
+						<tr id="preferred-sections-row">
+							<td colspan="2" id="preferred-sections-list">
+								<table id="preferred-sections-table" class="mouseovertable">
+									<tr><td></td></tr>
+								</table>
+							</td>
+						</tr>
+						<tr>
+							<th>
+								<label for="notes">Notes:</label>
+							</th>
+							<td>
+								<input name="notes" id="notes" value="" size="20" />
+							</td>
+						</tr>
+						<tr>
+							<th>
+								<label for="bgc">Color:</label>
+							</th>
+							<td>
+								<input name="bgc" id="bgc" value="#abcdef" type="text" style="background-color:#abcdef;" size="8" />
+								<input type="image" src="icons/randomcolor.png" name="rand-color" id="rand-color" alt="!" title="Random color" class="detail-button" /> &nbsp; 
+								<input type="image" src="icons/brighter.png" name="set-brighter" id="set-brighter" alt="△" title="Brighter" class="detail-button" />
+								<input type="image" src="icons/darker.png" name="set-darker" id="set-darker" alt="▼" title="Darker" class="detail-button" />
+							</td>
+						</tr>
+						<tr>
+							<th></th>
+							<td>
+								<table id="col2-toolbar-table"><tr>
+									<td id="col2-toolbar-left">
+										<input type="image" src="icons/help.png" name="get-standard-response" id="get-standard-response" alt="ⓘ" title="Help manual" class="detail-button" />
+										<input type="image" src="icons/links.png" name="get-useful-links" id="get-useful-links" value="☺" title="Useful Links" class="detail-button" />
+									</td><td id="col2-toolbar-right">
+										<input type="image" src="icons/switch-custom.png" alt="↩" class="detail-button" name="switch-mode-button" id="switch-mode-button" title="Switch to Custom events mode" />
+									</td>
+								</tr></table>
+							</td>
+						</tr>
+					</table>
+				</td>
+				<td id="third-column">&nbsp;</td>
+			</tr>
+		</table>
+	</div>
+
+
+	<!--<div id="bs-blackout">&nbsp;</div>
+	<div id="bs-sheetcontainer"></div>-->
+	
+	<div id="temp-table-area"></div>
+	
+	<script type="text/javascript" src="njs_runtime.js"></script>
+
+	<script type="text/javascript" src="common.js"></script>
+	<script type="text/javascript" src="common2.js"></script>
+	<script type="text/javascript" src="http.js"></script>
+	<script type="text/javascript" src="color.js"></script>
+	
+	<script type="text/javascript" src="blocksheet.js"></script>
+	<script type="text/javascript" src="tooltip.js"></script>
+	
+	<script type="text/javascript">
+		installBlockingSheet();
+		installTooltips();
+	</script>
+
+	
+	<script type="text/javascript" src="timeinterval.js"></script>
+	<script type="text/javascript" src="subsection.js"></script>
+	<script type="text/javascript" src="section.js"></script>
+	<script type="text/javascript" src="course.js"></script>
+	<script type="text/javascript" src="coursenet.js"></script>
+	
+	<script type="text/javascript" src="hkust.js"></script>
+	<script type="text/javascript" src="hkust-events.js"></script>
+	
+	<!--<script type="text/javascript">NjsCompiler.load('hkust.njs');</script>-->
+	
+<script>
+/*var a11=new TimeInterval(0,0,1);
+var a12=new TimeInterval(1,1,2);
+var a21=new TimeInterval(0,0,1);
+var a22=new TimeInterval(1,0,1);
+var a31=new TimeInterval(0,2,3);
+var a32=new TimeInterval(1,3,4);
+var a1=new Section(1);a1.add(a11);a1.add(a12);
+var a2=new Section(2);a2.add(a21);a2.add(a22);
+var a3=new Section(3);a3.add(a31);a3.add(a32);
+var a=new Course('A');a.add(a1);a.add(a2);a.add(a3);
+var b11=new TimeInterval(1,0,0);
+var b21=new TimeInterval(1,3,3);
+var b31=new TimeInterval(1,3,3);
+var b1=new Section(1);b1.add(b11);
+var b2=new Section(2);b2.add(b21);
+var b3=new Section(3);b3.add(b31);
+var b=new Course('B');b.add(b1);b.add(b2);b.add(b3);
+var c11=new TimeInterval(2,0,3);
+var c1=new Section(1);c1.add(c11);
+var c=new Course('C');c.add(c1);
+var d11=new TimeInterval(1,0,7);
+var d1=new Section(1);d1.add(d11);
+var d=new Course('D');d.add(d1);
+
+var sn = new CourseNetwork();
+sn.add(a);
+sn.add(b);
+sn.add(c);
+sn.add(d);*/
+
+var sn = new CourseNetwork();
+
+//getDepartment(sn, 'PHYS', document.getElementById('temp-table-area'));
+
+</script>
+		
+</body>
+</html>

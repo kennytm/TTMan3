@@ -1,0 +1,53 @@
+#bs-blackout {
+	z-index: 899;
+	background-color: black;
+	position: fixed;
+	width: 100%;
+	top: 0em;
+	left: 0em;
+	display: none;
+}
+
+#bs-sheetcontainer {
+	z-index: 900;
+	position: fixed;
+	top: 0em;
+	left: 0em;
+	width: 100%;
+}
+
+#bs-sheet {
+	position: relative;
+	margin: auto;
+	width: 50%;
+	-webkit-box-shadow: 0.5em 0.5em 2em rgba(0,0,0,0.5);	
+	font-family: 'Trebuchet MS', Helvetica, Arial, Sans, sans-serif;
+}
+
+#bs-table {
+	padding: 0.5em;
+	width: 100%;
+}
+
+#bs-icon {
+	width: 100px;
+	height: 100px;
+	text-align: center;
+	vertical-align: middle;
+}
+
+#bs-content {
+	vertical-align: top;
+}
+
+#bs-buttons {
+	text-align: right;
+}
+
+#bs-title {
+	font-weight: bold;
+	font-size: 1em;
+	margin: 0em;
+	padding: 0.25em;
+	text-align: center;
+}
