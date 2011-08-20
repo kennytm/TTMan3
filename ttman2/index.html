@@ -1,0 +1,4435 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<title>HKUST Timetable Manager 2</title>
+<meta http-equiv="Content-Type" content="application/xhtml+xml; charset=utf-8" />
+
+<!--
+
+HKUST Timetable Manager 2
+Copyright (C) 2008-2009  Kenny TM~ <kennytm@stu.ust.hk>
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+-->
+
+<style type="text/css">
+/*<![CDATA[*/
+
+html {
+	font-family: 'Lucida Grande', 'Bitstream Vera Sans', Helvetica, Arial, sans-serif;
+	font-size: 0.8em;
+	font-size-adjust: 0.54;
+}
+
+input { font-size: 0.75em; }
+#temp_table_area { display: none; }
+
+#message_area {
+	visibility: hidden;
+	position: fixed;
+	top: 0em;
+	left: 0em;
+	width: 100%;
+	z-index: 899;
+}
+
+#maskout {
+	z-index: 900;
+	background-color: black;
+	position: relative;
+	width: 100%;
+	top: 0em;
+	left: 0em;
+	opacity: 0.75;
+}
+
+#actual_message {
+	background-color: maroon;
+	color: white;
+	font-family: 'Trebuchet MS', Helvetica, Arial, Sans, sans-serif;
+	width: 50em;
+	height: 12.5em;
+	text-align: left;
+	position: absolute;
+	z-index: 901;
+	padding: 0.5em;
+	-webkit-box-shadow: 1em 1em 2em rgba(0,0,0,0.5);
+}
+
+.bigwarning { background-color: #AA0000!important; }
+
+#dismiss_button {
+	position: absolute;
+	right: 0.75em;
+	bottom: 0.75em;
+	font-size: 1.5em;
+	cursor: pointer;
+	font-family: "Lucida Grande", "Arial Unicode MS", "Lucida Sans Unicode", "Palatino Linotype", palatino, serif;
+}
+
+#actual_message p { margin: 5.5em 0em 0em 0em; }
+
+.titlemsg {
+	font-size: 500%;
+	font-weight: bold;
+	text-align: center;
+	color: lightyellow;
+	position: absolute;
+	top: 0em;
+	width: 100%;
+	margin: 0em!important;
+}
+
+.cross {
+	color: #FFCCCC;
+	opacity: 0.8;
+}
+
+.detail_button {
+	border: 1px solid white;
+	background-color: white;
+	color: #8080FF;
+	width: 1.5em;
+	height: 1.5em;
+	cursor: pointer;
+	-moz-user-focus: ignore;
+	font-weight: normal;
+	font-size: 1em;
+	padding: 0em;
+	-webkit-appearance: button;
+}
+
+.detail_button:hover {
+	border-color: navy;
+	background-color: #CCCCFF;
+	color: blue;
+}
+
+.detail_button:active {
+	border-color: maroon;
+	background-color: #FFCCCC;
+	color: red;
+}
+
+.detail_button::-moz-focus-inner { border: none; }
+.detail_button[disabled] { color: #808080; }
+
+.detail_button[disabled]:hover {
+	border-color: white;
+	background-color: white;
+	color: #808080;
+}
+
+.mouseovertable {
+	border: 1px solid gray;
+	margin: auto;
+}
+
+.mouseovertable th { text-align: center; }
+
+.info_table {
+	border-style: none;
+	border-collapse: collapse;
+	width: 100%;
+}
+
+.info_table th, .info_table td, #course_waitlist_header th { border: 1px solid gray; }
+
+#course_list_container {
+	height: 350px;
+	width: 180px;
+	overflow-y: auto;
+	padding: 0em;
+	display: block;
+}
+
+#course_list td {  white-space: nowrap; }
+
+#preferred_sections_table td { vertical-align: middle; }
+#preferred_sections_row { vertical-align: top; }
+#preferred_sections_list { height: 255px; }
+
+.mouseovertable:hover { background-color: #FFFFEE; }
+.mouseovertable tr:hover { background-color: #FFFFCC; }
+
+th, td { vertical-align: top; }
+th { text-align: right; }
+
+#tooltip, #collisiontip, #enrolledtip {
+	position: absolute;
+	visibility: hidden;
+	border: 1px solid black;
+	background-color: white;
+	color: black;
+	font-size: 0.9em;
+	opacity: 0.9;
+	padding: 0.15em;
+	z-index: 2000;
+	-webkit-box-shadow: 0.2em 0.2em 0.4em rgba(0,0,0,0.5);
+	box-shadow: 0.2em 0.2em 0.4em rgba(0,0,0,0.5);
+}
+
+#collisiontip { background-color: #FFECEC; }
+#enrolledtip { background-color: #CCFFCC; }
+
+#main_table {
+	width: 100%;
+	height: 395px;
+}
+
+#first_column { width: 180px; }
+#second_column { width: 285px; }
+
+.addwaitheader { text-align: right; font-weight: bold; }
+
+#course_waitlist_container, #dept_courses_container {
+	overflow-y: auto;
+	overflow-x: hidden;
+	border: 1px solid black;
+}
+
+#course_waitlist_header {
+	border-collapse: collapse;
+	margin-left: 1px;
+}
+
+.highlighted { color: black; background-color: #FFFFCC; }
+.highlightable:hover { text-decoration: underline; }
+#course_info_row { font-weight: bold; }
+#course_description_row td {
+	padding: 1em;
+	text-align: justify;
+}
+
+#dept_courses_container {
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+
+.dept_redundant {
+	color: #808080;
+	font-size: smaller;
+}
+
+.dept_redundant_plain { font-size: smaller; }
+
+.cc_id .dept_redundant { color: #4040C0; }
+.cc_id {
+	color: navy;
+	cursor: pointer;
+}
+
+.cc_id:hover { text-decoration: underline; }
+
+#dept_courses_table .course_enrolled_indicator, #dept_courses_table .course_collision_indicator {
+	margin-left: 1em;
+}
+
+.course_collision_indicator { color: #C04040; }
+.course_collision_indicator .dept_redundant { color: #FF8080; }
+.course_enrolled_indicator { color: #408040; }
+.course_enrolled_indicator .dept_redundant { color: #40C040; }
+
+tfoot { color: silver; }
+
+#mode_label_container { width: 53px; }
+
+#course_list_header { width: 100%; }
+#course_list_header th { text-align: left; }
+#course_list_header td { text-align: right; }
+
+.small_table { width: 100%; }
+.small_table tr { height: 0.25em; }
+
+.small_table, .detailed_table {
+	border: 1px solid black;
+	border-collapse: collapse;
+}
+
+.small_table th, .small_table td {
+	vertical-align: middle;
+	text-align: center;
+}
+
+.small_table td { padding-bottom: 0em!important; }
+.combin_table { width: 100%; }
+.combin_table td {
+	text-align: left;
+}
+.combin_timetable_cell { width: 10%; }
+
+.desc_text {
+	font-size: 0.8em;
+	padding-bottom: 6ex;
+	width: 15%;
+	line-height: 3ex;
+}
+
+.filled { border: 1px solid black; }
+.nowrap { white-space: nowrap; }
+.not_enough_freespace, .too_much_waitlist { color: #FF8000; }
+
+.highlighted .course_collision_indicator { color: #C04040!important; }
+.highlighted .course_enrolled_indicator { color: #408040!important; }
+#course_waitlist_table .course_collision_indicator { color: #C04040; }
+#course_waitlist_table .course_enrolled_indicator { color: #408040; }
+#course_waitlist_table { color: black; }
+
+#iobox p { margin: 0.5em 0em; text-align: center; }
+#io_textarea { width: 95%; height: 105px; }
+
+.courselist_label, .cb_course_code { padding: 0em 0.25em; }
+
+#sections_manipulation_panel { text-align: center; }
+
+.ext_time { color: silver; }
+.hours { font-weight: bold; }
+
+#result_area li { padding-bottom: 1ex; }
+h2::before {
+	content: counter(section) '.  ';
+	color: #AAAAAA;
+}
+h2 {
+	counter-increment: section;
+	counter-reset: subsection;
+	padding-top: 3ex;
+}
+h3::before {
+	content: counter(section) "." counter(subsection) ". ";
+	color: #CCCCCC;
+}
+h3 {
+	counter-increment: subsection;
+	font-style: italic;
+}
+
+.toc_link { color: #EEEEFF; text-decoration: none; }
+h2:hover .toc_link { color: #CCCCFF; }
+.toc_link:hover { color: #8080FF!important; }
+
+/*]]>*/
+</style>
+
+<!--[if IE]>
+<style type="text/css">
+/*<![CDATA[*/
+#maskout { filter: alpha(opacity=75); }
+#tooltip, #collisiontip, #enrolledtip { filter: alpha(opacity=90); }
+/*]]>*/
+</style>
+<![endif]-->
+
+<script type="text/javascript">
+//<![CDATA[
+
+// XHR codes.
+
+var X, $B, $R, $W, $MSG, $DismissButton, WT, T;
+
+var acceptable_error_codes = {200: true, 404: true};
+var all_finished = true;
+var being_disabled = false;
+var is_dismissable_message = false;
+
+var ProxyCGI = location.protocol + '//ihome.ust.hk/~kennytm/cgi-bin/proxy.cgi';
+
+var M = {
+	'HTTPError':
+		function (s, c) { return "<p class='titlemsg'>☹ " + s + "</p><p>HTTP Error #" + s + "<br />Server returned the error message [" + c + "].</p>"; },
+	'ConnectionFailed':
+		"<p class='titlemsg'>↹</p><p class='titlemsg cross'>✗</p><p>Server cannot be reached. Please try again later.</p>",
+	'CannotCreateXHR':
+		"<p class='titlemsg'>⎋</p><p class='titlemsg cross'>✗</p><p>The <code>XMLHttpRequest</code> object cannot be created.<br />If you are using Internet Explorer, probably you have turned off ActiveX control. Please turn it on.<br />Otherwise, please upgrade your browser to the most recent version.</p>",
+	'CannotDoCrossDomainRequest':
+		"<p class='titlemsg'>⎌</p><p class='titlemsg cross'>✗</p><p>Cannot do cross-domain request. Please save this to local drive and run that file.<br />If you are using the Mozilla Firefox or Seamonkey, you may need to disable some extensions also, e.g. Firebug.<br />If the error still happens, your browser does not support cross-domain request entirely, and there is no way to make this JSApp work.</p>",
+	'Wait':
+		function (u) { return "<p class='titlemsg'>⌛ Loading…</p><p>Waiting for [" + u + "]</p>"; },
+//--------------------------------------------------------------------------
+	'NoSuchCourse':
+		function (t) {
+			var courseHTML = cc_id(' ' + t.toUpperCase(), true);
+			return '<p class="titlemsg">∄' + courseHTML + '</p><p>The course' + courseHTML + ' does not exist.</p>';
+		},
+	'NoSuchDept':
+		function (t) { return '<p class="titlemsg">∄ ' + t.toUpperCase() + '</p><p>The department ' + t.toUpperCase() + ' does not exist.</p>'; },
+	'GettingDept':
+		function (t, u) { return '<p class="titlemsg">⌛ ↹ ' + t.toUpperCase() + ' …</p><p>Querying course information from ' + t.toUpperCase() + " department.<br />Waiting for [" + u + "]</p>"; },
+	'GettingLifts':
+		"<p class='titlemsg'>⌛ ⇅ …</p><p>Querying lift information…</p>",
+	'TimeConflict':
+		function (a, b) {
+			return '<p class="titlemsg">' + '↮' +'</p>';
+		},
+	'SingleConflict':
+		function (code) {
+			var courseHTML = cc_id(' ' + code.toUpperCase(), true);
+			return '<p class="titlemsg">⊞ ↮' + courseHTML + '</p><p>The course' + courseHTML + ' has time conflict with the rest of your course list.</p>';
+		},
+	'TooManyPossibilities':
+		function (code, pos) {
+			var courseHTML = cc_id(' ' + code.toUpperCase(), true);
+			return '<p class="titlemsg">⊞</p><p class="titlemsg cross">✗</p><p>Over 1000 timetables will be generated (approximately: ' + pos + ').<br />Cannot add courses starting from ' + courseHTML + '.<br />Please change some elective courses to required or narrow down the preferred sections to reduce the choices.</p>';
+		},
+	'LoadingConfirmedEnrollment':
+		"<p class='titlemsg'>⌛ ® …</p><p>Fetching confirmed enrollment data…</p>",
+	'LoadCEFailed':
+		function (x) {
+			if (x)
+				return '<p class="titlemsg">®</p><p class="titlemsg cross">✗</p><p>Cannot retrieve the confirmed enrollments: <strong>' + x + '</strong>.</p>';
+			else
+				return '<p class="titlemsg">®</p><p class="titlemsg cross">✗</p><p>Cannot retrieve the confirmed enrollments for unknown reason.</p>';
+		},
+	'CEEmpty':
+		'<p class="titlemsg">∅</p><p>The confirmed enrollments record is empty.</p>'
+};
+
+function $ (s) { return document.getElementById(s); }
+
+var ready = function (s, c, t) {};
+
+function onready () {
+	if (X.readyState == 4) {
+		if (X.status in acceptable_error_codes) {
+			ready (X.responseText, X.status, X.statusText);
+		} else {
+			try {
+				W( M.HTTPError(X.status, X.statusText), true, true);
+			} catch (e) {
+				W( M.HTTPError(X.status, ""), false, true);
+			}
+		}
+	}
+};
+
+function IX () {
+    if(window.XMLHttpRequest) {
+		try {
+			X = new XMLHttpRequest();
+        } catch(e) {
+			X = false;
+		}
+    } else if(window.ActiveXObject) {
+		try {
+			X = new ActiveXObject("Msxml2.XMLHTTP");
+		} catch(e) {
+			try {
+				X = new ActiveXObject("Microsoft.XMLHTTP");
+			} catch(e) {
+				X = false;
+			}
+		}
+	}
+	
+	if (!X) {
+		W(M.CannotCreateXHR, false, true);
+	}
+}
+
+function W (m, sdb, redbg) {
+	disability(!!m);
+	clearTimeout(WT);
+	WT = null;
+	
+	$Tooltip.style.visibility = 'hidden';
+	$ColTip.style.visibility = 'hidden';
+	
+	sdb = !!sdb;
+	
+	if (redbg)
+		$MSG.className = "bigwarning";
+	else
+		$MSG.className = "";
+	
+	if (m) {
+		is_dismissable_message = sdb;
+	
+		$MSG.firstChild.innerHTML = m;
+		show_io();
+		$W.style.visibility = "visible";
+		if (sdb) {
+			$DismissButton.style.visibility = "visible";
+			$DismissButton.focus();
+			WT = setTimeout("W(null, true)", m.length*33);
+		} else {
+			$DismissButton.style.visibility = "hidden";
+		}
+	} else {
+		if (sdb == is_dismissable_message) {
+			is_dismissable_message = false;
+			hide_io_1();
+		}
+	}
+}
+
+function GET (u, altmsg) {
+	if (X) {
+	
+		// automatically switch to online mode if not executed locally.
+		if (location.protocol != 'file:') {
+			POST(ProxyCGI, 'url=' + encodeURIComponent(u), altmsg);
+			return;
+		}
+	
+		try {
+			netscape.security.PrivilegeManager.enablePrivilege('UniversalBrowserRead');
+		} catch(e) { }
+		
+		try {
+			X.open ("GET", u, true);
+		} catch(e) {
+			POST(ProxyCGI, 'url=' + encodeURIComponent(u), altmsg);
+			return;
+		}
+		
+		W(altmsg || M.Wait(u));
+		
+		X.onreadystatechange = onready;
+		X.send (null);
+	}
+}
+
+function POST (u, c, altmsg) {
+	if (X) {
+
+		try {
+			netscape.security.PrivilegeManager.enablePrivilege('UniversalBrowserRead');
+		} catch(e) { }
+		
+		try {
+			X.open ("POST", u, true);
+		} catch(e) {
+			W(M.CannotDoCrossDomainRequest, false, true);
+			return;
+		}
+		
+		W(altmsg || M.Wait(u));
+		
+		X.onreadystatechange = onready;
+		X.setRequestHeader("Content-Type","application/x-www-form-urlencoded; charset=utf-8");
+		X.send (c);
+	}
+}
+
+function disability(b) {
+	if (being_disabled == b)
+		return;
+	being_disabled = b;
+
+	var objs = toArray(document.getElementsByTagName('input')).concat(
+			toArray(document.getElementsByTagName('select')),
+			toArray(document.getElementsByTagName('button'))
+	);
+	if (b) {
+		for (var i = objs.length - 1; i >= 0; --i) {
+			if (objs[i].id != "dismiss_button") {
+				objs[i].wasDisabled = objs[i].disabled;
+				objs[i].disabled = true;
+			}
+		}
+	} else {
+		for (var i = objs.length - 1; i >= 0; --i) {
+			if (objs[i].id != "dismiss_button")
+				objs[i].disabled = objs[i].wasDisabled;
+		}
+	}
+		
+}
+
+//]]>
+</script>
+<script type="text/javascript">
+//<![CDATA[
+
+Array.prototype.clone = function () {
+	var l = this.length;
+	var a = [];
+	for (var i = 0; i < l; ++ i) {
+		if ('object' == typeof this[i])
+			a[i] = this[i].clone();
+		else
+			a[i] = this[i];
+	}
+	
+	return a;
+}
+
+Array.prototype.unique = function (f) {
+	var a = this.sort(f);
+	var final_array = [];
+	var l = a.length;
+	
+	final_array.push(a[l-1]);
+	
+	for (var i = l-2; i >= 0; --i) {
+		if (f(a[i+1], a[i]))
+			final_array.push(a[i]);
+	}
+		
+	return final_array.reverse();
+}
+
+if (!Array.prototype.lastIndexOf) {
+	Array.prototype.lastIndexOf = function (t) {
+		for (var i = this.length-1; i >= 0; --i)
+			if (this[i] == t)
+				return i;
+		return -1;
+	}
+}
+
+Array.prototype.testPattern = function (re) {
+	for (var i = this.length-1; i >= 0; --i)
+		if (re.test(this[i]))
+			return true;
+	return false;
+}
+
+function toArray (col) {
+	var a = [];
+	var len = col.length;
+	for (var i = 0; i < len; ++ i)
+		a.push(col[i]);
+	return a;
+}
+
+function sgn (a, b) {
+	return a < b ? -1 : a > b ? 1 : 0;
+}
+
+function pad (x, n) {
+	var y = x;
+	if ("string" != typeof y)
+		y = x.toString();
+	
+	var z = n - y.length;
+	var zeros = "000000000000000000000000000000000000";
+	while (z > 0) {
+		substr = zeros.substr(0, z);
+		z -= substr.length;
+		y = substr + y;
+	}
+	
+	return y;
+}
+
+function nl2br (s) { return s.replace (/\n/g, '<br />'); }
+
+function escapeHTML (s) {
+	return s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+//")} (fix Xcode formatting)
+
+function unescapeHTML (s) {
+	return s.replace(/&gt;/g, '>').replace(/&lt;/g, '<').replace(/&quot;/g, '"').replace(/&amp;/g, '&');
+}
+
+// the following 1 function is new in Aug 03, 2008 to fix the FINA-110 / ECON-503 problems, where courses without tutorials cannot have preferred sections.
+function isEmpty (obj) {
+	for (var sth in obj)
+		return false;
+	return true;
+}
+
+var getText;
+
+
+// get the human-readable relative date from now. 
+function relativeDate (d) {
+	var difference = new Date() - d;		// number of milliseconds pasted since last update.
+	var minutes = difference / 60000;
+	if (minutes < 1)
+		return "less than a minute ago";
+	else if (minutes < 2)
+		return "a minute ago";
+	else if (minutes < 60)
+		return (minutes >>> 0) + " minutes ago";
+	else {
+		var hours = minutes / 60;
+		if (hours < 2)
+			return "an hour ago";
+		else if (hours < 24)
+			return (hours >>> 0) + " hours ago";
+		else {
+			var days = hours / 24;
+			if (days < 2)
+				return "yesterday";
+			else if (days < 32)
+				return (days >>> 0) + " days ago";
+			else
+				return "more than a month ago";
+		}
+	}
+}
+
+// find position of an element.
+// method attribute to http://www.quirksmode.org/js/findpos.html
+function findOffsetPos(obj) {
+	var curleft = 0, curtop = 0;
+	if (obj.offsetParent) {
+		do {
+			curleft += obj.offsetLeft;
+			curtop += obj.offsetTop;
+		} while ((obj = obj.offsetParent));
+	}
+	
+	return [curleft,curtop];
+}
+
+var htmlElement = document.getElementsByTagName('html')[0];
+
+function findScrollPos(obj) {
+	var scrLeft = 0, scrTop = 0;
+	if (obj.parentNode) {
+		do {
+			scrLeft += obj.scrollLeft || 0;
+			scrTop += obj.scrollTop || 0;
+		} while ((obj = obj.parentNode));
+	}
+	
+	return [scrLeft - (window.scrollX || document.body.scrollLeft || htmlElement.scrollLeft), scrTop - (window.scrollY || document.body.scrollTop || htmlElement.scrollTop)];
+}
+
+function findPos(obj) {
+	var obj1 = obj;
+	var offset = findOffsetPos(obj1);
+	var scroll = findScrollPos(obj);
+	return [offset[0]-scroll[0], offset[1]-scroll[1]];
+}
+
+//]]>
+</script>
+<script type="text/javascript">
+//<![CDATA[
+// just for debugging...
+function shallow_serialize (obj) {
+    if ("object" == typeof obj) {
+        var str = ["{"];
+        for (var key in obj)
+			if (!(obj[key] instanceof Function))
+				str.push("\t" + key + ":\t" + obj[key]);
+        str.push("}");
+        return str.join("\n");
+    } else
+        return obj;
+}
+//]]>
+</script>
+<script type="text/javascript">
+//<![CDATA[
+
+function getBrightness (rgbarr) {
+	return 0.2126 * rgbarr[0] + 0.7152 * rgbarr[1] + 0.0722 * rgbarr[2];
+}
+
+function getTextColorFromBG (rgb) {
+	if ("string" == typeof rgb)
+		rgb = ('0x' + rgb.replace(/#/g, '')) >>> 0;
+	return getBrightness( num_to_rgb(rgb) ) <= 0.5 ? "white" : "black";
+}
+
+function color_to_num (rgb) {
+	if ("string" == typeof rgb)
+		rgb = ('0x' + rgb.replace(/#/g, '')) >>> 0;
+	return rgb;
+}
+
+function num_to_color(num) {
+	return '#' + pad(num.toString(16), 6);
+}
+
+function num_to_rgb (rgb) {
+	var r = 1/255;
+	return [(rgb >> 16)*r, ((rgb >> 8) & 0xFF)*r, (rgb & 0xFF)*r];
+}
+
+function rgb_to_num (rgbarr) {
+	return (rgbarr[0]*255+0.5) << 16 | (rgbarr[1]*255+0.5) << 8 | (rgbarr[2]*255+0.5);
+}
+
+function rgb_to_hsl(rgbarr) {
+	var maxrgb = Math.max.apply(null, rgbarr);
+	var minrgb = Math.min.apply(null, rgbarr);
+	var l = 0.5*(maxrgb + minrgb);
+	if (maxrgb == minrgb) {
+		return [0, 0, l];
+	} else {
+		var s = (maxrgb - minrgb) / (l <= 0.5 ? 2*l : 2-2*l);
+		var h = 1/(maxrgb - minrgb)/6;
+		if (maxrgb == rgbarr[0]) {
+			h *= rgbarr[1]-rgbarr[2];
+			if (h < 0)
+				h += 1;
+		} else if (maxrgb == rgbarr[1]) {
+			h *= rgbarr[2]-rgbarr[0];
+			h += 1/3;
+		} else if (maxrgb == rgbarr[2]) {
+			h *= rgbarr[0]-rgbarr[1];
+			h += 2/3;
+		}
+		return [h, s, l];
+	}
+}
+
+// hsl->rgb code by http://www.geekymonkey.com/Programming/CSharp/RGB2HSL_HSL2RGB.htm
+function hsl_to_rgb(hslarr) {
+	if (hslarr[2] <= 0)
+		return [0,0,0];
+	else if (hslarr[2] >= 1)
+		return [1,1,1];
+	if (hslarr[1] == 0)
+		return [hslarr[2],hslarr[2],hslarr[2]];
+
+	var v = (hslarr[2] <= 0.5) ? (hslarr[2] * (1 + hslarr[1])) : (hslarr[2] + hslarr[1] - hslarr[2] * hslarr[1]);
+	var m = 2*hslarr[2] - v;
+	var sv = (v - m ) / v;
+	var h = hslarr[0]*6;
+	var sextant = h >>> 0;
+	var fract = h - sextant;
+	var vsf = v * sv * fract;
+	var mid1 = m + vsf;
+	var mid2 = v - vsf;
+	var r, g, b;
+	
+	switch (sextant) {
+		case 0:
+			r = v;
+			g = mid1;
+			b = m;
+			break;
+		case 1:
+			r = mid2;
+			g = v;
+			b = m;
+			break;
+		case 2:
+			r = m;
+			g = v;
+			b = mid1;
+			break;
+		case 3:
+			r = m;
+			g = mid2;
+			b = v;
+			break;
+		case 4:
+			r = mid1;
+			g = m;
+			b = v;
+			break;
+		case 5:
+			r = v;
+			g = m;
+			b = mid2;
+			break;
+	}
+	
+	if (r < 0) r = 0;
+	if (r > 1) r = 1;
+	if (g < 0) g = 0;
+	if (g > 1) g = 1;
+	if (b < 0) b = 0;
+	if (b > 1) b = 1;
+	
+	return [r, g, b];
+}
+
+function darker_mul (rgb) {
+	return num_to_color((color_to_num(rgb) & 0xFEFEFE) >>> 1);
+}
+
+function darker (rgb) {
+	var hsl = rgb_to_hsl(num_to_rgb(color_to_num(rgb)));
+	hsl[2] -= 0.2;
+	return num_to_color(rgb_to_num(hsl_to_rgb(hsl)));
+}
+
+function brighter (rgb) {
+	var hsl = rgb_to_hsl(num_to_rgb(color_to_num(rgb)));
+	hsl[2] += 0.2;
+	return num_to_color(rgb_to_num(hsl_to_rgb(hsl)));
+}
+
+
+//]]>
+</script>
+<script type="text/javascript">
+//<![CDATA[
+
+// Code attribute to http://www.robertnyman.com/2006/04/24/get-the-rendered-style-of-an-element/
+function getStyle(oElm, strCssRule){
+	var strValue = "";
+	if(document.defaultView && document.defaultView.getComputedStyle){
+		strValue = document.defaultView.getComputedStyle(oElm, "").getPropertyValue(strCssRule);
+	}
+	else if(oElm.currentStyle){
+		strCssRule = strCssRule.replace(/\-(\w)/g, function (strMatch, p1){
+			return p1.toUpperCase();
+		});
+		strValue = oElm.currentStyle[strCssRule];
+	}
+	return strValue;
+}
+
+//]]>
+</script>
+<script type="text/javascript">
+//<![CDATA[
+
+function clearTable (table) {
+	try {
+		table.innerHTML = "<tr><td></td></tr>";
+	} catch(e) {
+		while (table.rows.length) {
+			table.deleteRow(table.rows.length-1);
+		}
+	}
+}
+
+function setInnerHTML (table, src) {
+	try {
+		table.innerHTML = src;
+		return table;
+	} catch (e) {
+		var table_id = table.id;
+		clearTable(table);
+		var outerHTML = table.parentNode.innerHTML.replace(/<\/table>/i, '');
+		table.parentNode.innerHTML = outerHTML + src + '</table>';
+		return $(table_id);
+	}
+}
+
+//]]>
+</script>
+
+</head>
+
+<body>
+
+<div><table id="main_table">
+	<tr>
+		<td id="first_column">
+			<table id="course_list_header"><tr>
+				<th>Course list</th>
+				<td><input type="button" value="⊞ × 0" title="Show 0 timetables" id="show_timetables" name="show_timetables" /></td>
+			</tr></table>
+			<div id="course_list_container" class="mouseovertable">
+				<table id="course_list">
+					<tr><td></td></tr>
+				</table>
+			</div>
+			<div>
+				<input name="clear_all_items" id="clear_all_items" value="✘" title="Clear all items" class="detail_button" type="button" />
+				&emsp;
+				<input name="io_course_list" id="io_course_list" value="↹" title="Import/Export course list" class="detail_button" type="button" />
+				<input name="load_enrolled_courses" id="load_enrolled_courses" value="®" title="Load confirmed enrollments" class="detail_button" type="button" />
+				<input name="goto_course_reg" id="goto_course_reg" value="±" title="Go to official Course Registration System" class="detail_button" type="button" />
+				<input name="randomize_bgc" id="randomize_bgc" value="☯" title="Randomly assign background colors" class="detail_button" type="button" />
+			</div>
+		</td>
+		<td id="second_column">
+			<table>
+				<tr>
+					<th id="mode_label_container">
+						<label for="cc" id="mode_label">Course:</label>
+					</th>
+					<td>
+						<input name="cc" id="cc" value="PHYS" size="16" type="text" />
+						<input name="confirm_cc" id="confirm_cc" class="detail_button" value="?" title="Get detail of this course." type="button" />
+						<input name="add_course" id="add_course" value="+" title="Add item" class="detail_button" type="button" />
+						<input name="update_course" id="update_course" value="✓" title="Update selected item" class="detail_button" type="button" />
+						<input name="remove_course" id="remove_course" value="✗" title="Remove selected item" class="detail_button" type="button" />
+					</td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>
+						<input name="required_course" id="required_course" value="required_course" checked="checked" type="checkbox" /><label for="required_course"> Required.</label>
+						<input name="audit_course" id="audit_course" value="audit_course" type="checkbox" /><label for="audit_course"> Audit.</label>
+					</td>
+				</tr>
+				<tr><td colspan="2" id="sections_manipulation_panel">
+					<input type="button" value="■" id="select_all_sections" name="select_all_sections" title="Select all sections" class="detail_button" /> 
+					<input type="button" value="◩" id="toggle_preferred_sections" name="toggle_preferred_sections" title="Toggle checked sections" class="detail_button" /> 
+					<input type="button" value="□" id="clear_all_sections" name="clear_all_sections" title="Clear checked sections" class="detail_button" />
+				</td></tr>
+				<tr id="preferred_sections_row">
+					<td colspan="2" id="preferred_sections_list">
+						<table id="preferred_sections_table" class="mouseovertable">
+							<tr><td></td></tr>
+						</table>
+					</td>
+				</tr>
+				<tr>
+					<th>
+						<label for="bgc">Color:</label>
+					</th>
+					<td>
+						<input name="bgc" id="bgc" value="#abcdef" type="text" style="background-color:#abcdef;" size="8" />
+						<input name="rand_color" id="rand_color" value="!" title="Random color" class="detail_button" type="button" /> &nbsp;
+						<input name="set_brighter" id="set_brighter" value="△" title="Brighter" class="detail_button" type="button" />
+						<input name="set_darker" id="set_darker" value="▼" title="Darker" class="detail_button" type="button" />
+												
+						<br />
+						<input name="get_standard_response" id="get_standard_response" value="ⓘ" title="Help manual" class="detail_button" type="button" />
+						<input name="get_useful_links" id="get_useful_links" value="☺" title="Useful Links" class="detail_button" type="button" />
+					</td>
+				</tr>
+				<tr>
+					<th colspan="2"><input type="button" value="↩" class="detail_button" id="switch_mode_button" name="switch_mode_button" title="Switch to TimeBlock mode" /></th>
+				</tr>
+			</table>
+		</td>
+		<td id="third_column">&nbsp;</td>
+	</tr>
+</table></div>
+
+<div id="message_area"><div id="actual_message"><div id="actual_message_2"></div><div><input type="button" value="Close" id="dismiss_button" /></div></div><div id="maskout"> </div></div>
+
+<hr />
+
+<div id="result_area">
+
+<h1>HKUST Timetable Manager 2 Help Manual</h1>
+
+<div id="toc_area"></div>
+
+<h2>What is HKUST Timetable Manager?</h2>
+	<p>HKUST Timetable Manager 2 (TTMan2) is a <acronym title="Javascript applications">JSApp</acronym>
+		that provides a user-friendly course querying interface, and evaluates all possible timetables of a given course list.
+		It is created with the goal of replacing HKUST’s default <a href="https://w1.ab.ust.hk/jr_ta/main.jsp">Time Table Assistant</a>.
+	</p>
+
+<h2>How to use HKUST Timetable Manager?</h2>
+	<p>Basically, you add all courses you may or must enroll, and then click on
+		<input type="button" value="⊞ × XX" title="Show XX timetables" />
+		to get all possible combinations of the courses.
+	</p>
+
+<h2>Getting the detail of a course.</h2>
+	<p>To get the detail of a course, you enter the course code to the textbox on the top, and click on the
+		<input type="button" class="detail_button" value="?" title="Get detail of this course" />
+		button, or just hit [Enter ↵].</p>
+	<p>In addition, you can just enter the department code (e.g. “ELEC”) and click
+		<input type="button" class="detail_button" value="?" title="Get detail of this course" />
+		to get all courses available under that deparment in the current semester.</p>
+	<p>If course codes are found inside the description, they will be hyperlinked
+		to the corresponding courses. You can simply click on it to get detail of
+		the course.</p>
+
+<h2>Manipulating the course list.</h2>
+	<p>To add a course, you enter the course code ,
+		and click on the <input type="button" class="detail_button" value="+" title="Add item" /> button.</p>
+	<p>Additionally, you can check the “<input type="checkbox" /> Required” checkbox
+		to ensure the combinations must include the course. (If not, when there
+		is time conflict, that course may be ignored.) Or you can check the
+		“<input type="checkbox" /> Audit” checkbox so that all time conflicts
+		happened will be ignored (and the corresponding courses can be chopped apart.)</p>
+	<p>To modify the preferred sections or background colors of a course, select 
+		the course from the course list, change the information, then click on the
+		<input type="button" class="detail_button" value="✓" title="Update item" /> button.</p>
+	<p>To remove a course, select the course from the course list and click on the 
+		<input type="button" class="detail_button" value="✗" title="Remove item" /> button.</p>
+
+<h2>Saving the course list.</h2>
+	<p>Because of the limitations of JSApps, you cannot directly save the course
+		list, nor put it somewhere on web (otherwise it will be a server-based
+		webapp). However, this can still be manipulated manually. To export the
+		course list, click on the <input type="button" class="detail_button" value="↹" title="Import/Export course list" />
+		button below the course list. A dialog will then pop up. The code inside
+		the textbox is the course list you will need. Simply copy it and save it
+		anywhere you like for later use.</p>
+	<p>To import the code back to Timetable Manager, click on the same button
+		<input type="button" class="detail_button" value="↹" title="Import/Export course list" />.
+		Then paste your previously exported code into the same textbox, and click
+		<input type="button" value="Import" />.</p>
+
+<h2>How do I choose my preferred sections?</h2>
+
+	<p>Some courses such as <span class="dept_redundant">MATH&#8209;</span><strong>101</strong> and
+		<span class="dept_redundant">LANG&#8209;</span><strong>106</strong>
+		have a few to over twenty tutorial sections to choose from. Sometimes
+		you are just interested in one or two of all the varieties. In this case,
+		you can check the boxes in the table below course code textbox to indicate
+		your preferences.</p>
+	<p>The three buttons <input type="button" value="■" title="Select all sections" class="detail_button" />, 
+		<input type="button" value="◩" title="Toggle checked sections" class="detail_button" /> and
+		<input type="button" value="□" title="Clear checked sections" class="detail_button" /> are
+		useful for quickly manipulating the preferred sections.</p>
+	<p>The first will let you check all sections available; the second will invert
+		you selection, and the last will clear them all. This is useful, e.g. if 
+		you want to blacklist some unwanted sections, instead of making a whitelist.</p>
+	<p>If you select no boxes, it is equivalent to having no preferences, and all
+		sections will be considered when computing the timetable.</p>
+
+<h2>Loading confirmed enrollments.</h2>
+	<p>You can load the courses you have actually (pre-)registered by clicking the <input type="button" class="detail_button" value="®" title="Load confirmed enrollments" /> button.</p>
+
+<h2>The timetables</h2>
+	<p>After you clicked on the <input type="button" value="⊞ × XX" title="Show XX timetables" /> button above the course list,
+		all possible timetables will be listed out. Beside each table, the course
+		codes and the corresponding section numbers are listed. The total credit
+		for this combination will also be automatically calculated.</p>
+	<p>Around to the credits there are some buttons.</p>
+	<p><input type="button" value="↗" title="View detailed timetable in new window." class="detail_button" />
+		 will create a new window which shows the detailed information for that timetable.
+		 This detailed table is suitable for printing and presenting on your blog
+		 (you can save this file just like an ordinary web page using the “File → Save As” in the menu bar).</p>
+	<p><input type="button" value="↥" title="Set as course list." class="detail_button" /> will replace your
+		course list with those defining this timetable.</p>
+
+<h2>Adding constraints &mdash; Using TimeBlocks</h2>
+	<p>TimeBlocks are user-defined time intervals to represent important regular events
+		that no courses can interfere, e.g. day-off, part time job, etc. It works
+		like the Constraint feature in Time Table Assistant, but more powerful.</p>
+	<p>To add a TimeBlock, you need to switch to TimeBlock mode by clicking on
+		the <input type="button" value="↩" title="Switch to TimeBlock mode" class="detail_button" /> button
+		just above the horizontal line.</p>
+	<p>Then you enter the title of the TimeBlock, selecting the days and time
+		your TimeBlock would occupy, and finally click <input type="button" class="detail_button" value="+" title="Add item" />
+		to insert it into the course list, just like what you would have done
+		to regular courses.</p>
+	
+<h2>Why are some courses in <del class="course_collision_indicator">red</del> and <del class="course_enrolled_indicator">green</del>?</h2>
+	<p>HKUST Timetable Manager 2 is very smart. Whenever it encounters a course in
+		a description, it will automatically check if that can be fit into the
+		course list. If time clash occurs, the course will be highlighted in 
+		<del class="course_collision_indicator">red</del> to indicate so. You can
+		point to the course to see the reason of time clash. Similarly, if the course
+		is already enrolled, it will be shown in <del class="course_enrolled_indicator">green</del>.
+	</p>
+
+<h2>Working with Time Table Assistant</h2>
+	<p>While Timetable Manager surpasses the default Time Table Assistant in many aspects,
+		in some cases you still have to work with it. Timetable Manager did have 
+		features to ease interoperation with the Assistant.</p>
+	<p>For example, after generating the timetable there is a
+		<input type="button" value="➲" title="Transfer to Timetable Assistant." class="detail_button" /> button which will
+		transfer the timetable to Time Table Assistant. If you need to, for example,
+		generate an Excel file based on the timetable or save it directly on
+		HKUST’s server, this feature helps a lot. (Note that, audit courses will <em>not</em>
+		be transfered, in order to prevent crashing the Assistant.)</p>
+	<p>Additionally, you can also import course list from the default Time
+		Table Assistant. To do so, open the Assistant, copy all courses listed in
+		the lower-left corner. Then press <input type="button" class="detail_button" value="↹" title="Import/Export course list" />
+		and <em>type <tt>HKUST</tt></em> (in uppercase), and paste the list. Now click “Import” and the courses will be
+		added. If you are using Firefox, you can just select the “Swap” and “Drop”
+		buttons while copying, and typing HKUST would be unnecessary.</p>
+
+<h2>Getting help.</h2>
+	<p>You can go back to this screen by clicking on the <input type="button" class="detail_button" value="ⓘ" title="Help manual" /> button.</p>
+
+<h2>What are the pros and cons of HKUST Timetable Manager compared with the default Time Table Assistant?</h2>
+	<p>As of the current version of HKUST Timetable Manager, it has the following advantages:</p>
+	<ul>
+		<li>All combinations can be found automatically.</li>
+		<li>Credits will be calculated automatically.</li>
+		<li>No need to worry about “Session Time Out”.</li>
+	</ul>
+	<p>The followings are disadvantages of HKUST Timetable Manager which cannot be improved because of limitation of natures of JSApps:</p>
+	<ul>
+		<li>Timetables cannot be saved online (Although in the Assistant there are only 3 slots).</li>
+		<li>You cannot export the timetables to PDF or Excel without using plugins that are not portable.</li>
+	</ul>
+	<p>Nevertheless, you can always transfer the timetable you want to the Assistant to do want you cannot do here.</p>
+
+<h2>What about universities other than HKUST?</h2>
+	<p>A version on CUHK is being worked on. For others, sorry. ☺</p>	
+
+<h2>Troubleshooting</h2>
+
+<h3>I see squares in every button!</h3>
+	<p>To reduce size and dependency of this JSApp, button images are represented by a
+		Unicode character, not an image file. This may cause problems if that character
+		is not supported by any fonts in your system, or your browser does not
+		substitute fonts properly. A workaround is to install the font Arial Unicode MS,
+		which should show most glyphs.</p>
+
+<h3>I cannot load the confirmed enrollments.</h3>
+	<p>This is because you are running this JSApp online. When you run this JSApp
+		online, all your request will be routed through a proxy page on this
+		server to workaround a security restriction built in your browser. However,
+		the two features in question require authentication, which the proxy
+		does not handle yet.</p>
+	<p>To solve the problem, you could save this JSApp to local drive by choosing
+		“File → Save As” in the menu bar, then run the local copy.</p>
+
+<h3>The Transfer to Time Table Assistant function fails with a “Session Time Out”</h3>
+	<p>Close that window (or tab), login to the Time Table Assistant and try again. This is a problem of ITSC, not us ☺</p>
+
+<h3>Why it says “Cannot Create <code>XMLHttpRequest</code> Object”?</h3>
+	<p>This JSApp depends on the <a href="http://en.wikipedia.org/wiki/XMLHttpRequest"><code>XMLHttpRequest</code></a> object, which has been implemented in most modern browsers. Older types, such as Netscape Netvigator 4 (you are <em>really</em>
+	happy to use this?), do not support it, and therefore giving this
+	error. To temporary workaround this, use a modern browser that supports <code>XMLHttpRequest</code> such as Mozilla Firefox 2, Apple Safari 3 or Opera 9.</p>
+
+<h2>Can I redistribute this JSApp?</h2>
+	<p>Sure! This JSApp is released under the <a href="http://www.gnu.org/licenses/gpl-3.0.html">GNU General Public License (version 3.0)</a>,
+		so as long as you keep complying to it you can redistribute it as you like.</p>
+
+</div>
+
+<div id="tooltip"></div>
+<div id="collisiontip"></div>
+<div id="enrolledtip"></div>
+
+<div id="temp_table_area"></div>
+
+<script type="text/javascript">
+//<![CDATA[
+
+var lifts = {};
+
+function init_lifts () {
+	if (locked)
+		return;
+	locked = true;
+	ready = fill_lifts;
+	
+	GET('http://www.ust.hk/cgi-bin/itsc/roomlift/find.pl', M.GettingLifts);
+}
+
+function fill_lifts (s, c, t) {
+	if (c == 200) {
+		var re = /<tr>\n<td>\n([A-Z\d]+)<\/td>\n<td>\n&nbsp;&nbsp;&nbsp;&nbsp;\n([-,\d]+)<\/td>\n<\/tr>/g;
+		var m;
+		
+		while (m = re.exec(s))
+			lifts[m[1]] = m[2];
+
+		locked = false;
+		
+		setTimeout("init_course_lists();", 0);
+		
+	} else
+		W (M.HTTPError(c, t), false, true);
+}
+
+function get_lift (ven) {
+	if (ven in lifts)
+		return ven + " (" + lifts[ven] + ")";
+	else
+		return ven;
+}
+
+//]]>
+</script>
+
+<script type="text/javascript">
+//<![CDATA[
+
+$W = $('message_area');
+var $TTA = $('temp_table_area');
+
+var $MO = $('maskout');
+var $MSG = $('actual_message');
+var $DismissButton = $('dismiss_button');
+var $PrefSectTable = $('preferred_sections_table');
+var $Tooltip = $('tooltip');
+var $ColTip = $('collisiontip');
+var $EnrTip = $('enrolledtip');
+
+var $CC = $('cc');
+var $RC = $('required_course');
+var $AC = $('audit_course');
+var $BGC = $('bgc');
+
+var $CL = $('course_list');
+var $Col3 = $('third_column');
+
+var $ST = $('show_timetables');
+
+if ('textContent' in $W)
+	getText = function (elem) { return elem.textContent; }		// Moz & DOM-3
+else if ('innerText' in $W)
+	getText = function (elem) { return elem.innerText; }			// IE
+else if ('text' in $W)
+	getText = function (elem) { return elem.text; }				// ?
+else
+	getText = function (elem) { return elem.firstChild.nodeValue; } // works only if elem contains only 1 text node.
+
+
+var departments = {};
+var courses = {};
+
+var enrolled_courses = [];
+var enrolled_courses_hash = {};
+
+
+var T = {};	// a scratch pad for storing anything.
+var locked = false;	// a thread lock. Since TTMan is "single-threaded", yet async calls are made, this variable is necessary to prevent multiple data access.
+
+var after_done = null;		// a functor to be called after an async call is finished. 
+
+var FULLNAME = {'**':'**', L:'Lectures', T:'Tutorials', LA:'Laboratories'};
+var ALLTYPES = {L:0, T:0, LA:0};
+
+var isIPhone = /iP(?:hone|od)/i.test(navigator.userAgent);
+
+//--------------------------------------------------------------------------
+
+
+var $R = $('result_area');
+upgrade_tooltiptext($R);
+// build TOC.
+{
+	var goto_toc_sec = ' <a href="#toc_area" title="Table of content" class="toc_link">⇧</a>';
+	var $tocelem = $('toc_area');
+	var toc_src = ["<ol>"];
+	var h2s = $R.getElementsByTagName('h2');
+	var h2s_len = h2s.length;
+	for (var i = 0; i < h2s_len; ++ i) {
+		h2s[i].id = "helpsect_" + i;
+		toc_src.push('<li><a href="#helpsect_' + i + '">' + getText(h2s[i]) + '</a></li>');
+		h2s[i].innerHTML += goto_toc_sec;
+	}
+	$tocelem.innerHTML = toc_src.join("") + "</ol>";
+}
+
+var standard_response = $R.innerHTML;
+
+
+//--------------------------------------------------------------------------
+// Mask-out codes.
+
+function totally_center (element) {
+	element.style.left = (((document.documentElement.clientWidth || document.body.clientWidth) - element.clientWidth) >> 1) + 'px';
+	element.style.top = (((document.documentElement.clientHeight || document.body.clientHeight) - element.clientHeight) >> 1) + 'px';
+}
+
+function show_io (e) {
+	document.body.style.overflow = "hidden";
+	$MO.style.height = (document.documentElement.clientHeight || document.body.clientHeight) + 'px';
+	totally_center ($MSG);
+}
+
+function hide_io_1 () {
+	if (being_disabled)
+		disability(false);
+
+	is_dismissable_message = false;
+
+	$DismissButton.blur();
+	if (!isIPhone && !$CC.disabled)
+		$CC.focus();
+	$DismissButton.style.visibility = "hidden";
+	T["hide_io::start_time"] = new Date();
+	setTimeout("hide_io_2()", 0);
+	hide_io();
+}
+
+function hide_io_2() {	
+	var supposed_opacity = 100 - (new Date() - T["hide_io::start_time"])*15/100
+	
+	if (supposed_opacity > 0) {
+		$W.style.opacity = supposed_opacity * 0.01;
+		$W.style.filter = "alpha(opacity=" + supposed_opacity + ")";
+		
+		setTimeout("hide_io_2()", 50);
+	} else {
+		$W.style.opacity = 1;
+		$W.style.filter = "";
+		$W.style.visibility = "hidden";
+	}
+}
+
+function hide_io () {
+	document.body.style.overflow = "";
+}
+
+var stripAuto;
+if (document.defaultView && document.defaultView.getComputedStyle)
+	stripAuto = function(x){return x;}
+else
+	stripAuto = function(x){return x=="auto"?0:x;}
+
+window.onresize = function (e) {
+	if (document.body.style.overflow) {
+		show_io();
+	}
+	
+	var maxheight = 385;
+	
+	var $CWC = $('course_waitlist_container');
+	if ($CWC) {
+		var $CWT = $('course_waitlist_table');
+		$CWC.style.height = Math.min($CWT.offsetHeight, maxheight - $('course_info_row').offsetHeight - $('course_description_row').offsetHeight - $('course_waitlist_header').offsetHeight) + 'px';
+		var $CWH = $('course_waitlist_header');
+		for (var i = $CWH.rows[0].cells.length-1; i >= 0; -- i) {
+			// precise matching is required here, so we need to get the computed style.
+			$CWH.rows[0].cells[i].style.width = getStyle($CWT.rows[0].cells[i], 'width');
+		}
+	}
+	
+	var $DCC = $('dept_courses_container');
+	if ($DCC) {
+		var $DCH = $('dept_courses_header');
+		$DCC.style.height = Math.min($('dept_courses_table').offsetHeight, maxheight - parseFloat(stripAuto(getStyle($DCH,'margin-top')),10) - parseFloat(stripAuto(getStyle($DCH,'margin-bottom')),10) - $DCH.offsetHeight) + 'px';
+	}
+	
+}
+
+$DismissButton.onclick = hide_io_1;
+
+//--------------------------------------------------------------------------
+
+function upgrade_tooltiptext (root) {
+	var all = root.getElementsByTagName('*');
+	for (var i = all.length-1; i >= 0; -- i) {
+		var elem = all[i];
+		
+		if (elem.title) {
+			elem._title = nl2br(elem.title);
+			
+			elem.onfocus = show_tooltip;
+			elem.onblur = hide_tooltip;
+			
+			elem.title = "";
+			
+			if (!isIPhone) {
+				elem.onmouseover = show_tooltip;
+				elem.onmouseout = hide_tooltip;
+			} else {
+				queryOverlay = document.createElement('input');
+				queryOverlay.type = 'button';
+				queryOverlay.className = 'detail_button';
+				queryOverlay.value = '…';
+				queryOverlay.onclick = show_tooltip;
+				queryOverlay._title = elem._title;
+			}
+			
+			if (elem._title.substr(0, 10) == "collision:") {
+				elem._title = elem._title.substr(10);
+				elem.tipElement = $ColTip;
+			} else if (elem._title.substr(0, 9) == "enrolled:") {
+				elem._title = elem._title.substr(9);
+				elem.tipElement = $EnrTip;
+			} else
+				elem.tipElement = $Tooltip;
+			
+			if (isIPhone && elem.tipElement != $Tooltip) {
+				queryOverlay.tipElement = elem.tipElement;
+				queryOverlay._title = elem._title;
+				elem.parentNode.insertBefore(queryOverlay, elem.nextSibling);
+			}
+		}
+	}
+}
+
+function show_tooltip(e) {
+	this.tipElement.innerHTML = this._title;
+	
+	if (!isIPhone) {
+		var curpos = findPos(this);
+		if (this.tipElement != $Tooltip)
+			this.tipElement.style.left = (curpos[0]-this.tipElement.offsetWidth+4) + 'px';
+		else
+			this.tipElement.style.left = (curpos[0]+this.offsetWidth-4) + 'px';
+		this.tipElement.style.top = (curpos[1]+this.offsetHeight-4) + 'px';
+	} else {
+		$Tooltip.onmousedown();
+		$EnrTip.onmousedown();
+		$ColTip.onmousedown();
+		e.stopPropagation();
+	}
+	
+	this.tipElement.style.visibility = 'visible';
+}
+
+function hide_tooltip () {
+	this.tipElement.style.visibility = 'hidden';
+}
+
+if (isIPhone) {
+	$Tooltip.onmousedown = $EnrTip.onmousedown = $ColTip.onmousedown = function (e) {
+		this.style.visibility = 'hidden';
+	}
+	
+	window.onscroll = function () {
+		$Tooltip.style.left = $EnrTip.style.left = $ColTip.style.left = window.scrollX + 'px';
+		$Tooltip.style.top = $EnrTip.style.top = $ColTip.style.top = window.scrollY + 'px';
+
+	}
+}
+
+//--------------------------------------------------------------------------
+
+function TimeInterval_Argument (code, type, ssid, venue) {
+	this.code = code;
+	this.type = type;
+	if (ssid) {
+		this.ssid = ssid;
+		this.venue = venue;
+		this.isCourse = true;
+	} else {
+		this.isCourse = false;
+	}
+	
+	this.toString = function () {
+		return this.isCourse ? this.code + " " + this.toSection() : this.type;// + ", " + get_lift(this.venue);
+	}
+	
+	this.toHTML = function () {
+		return this.isCourse ? "<strong>" + this.code + "</strong> <em>" + this.toSection() + "</em><br /><small>" + get_lift(this.venue) + "</small>" : "<strong>" + this.type + "</strong>";
+	}
+	
+	this.toSection = function () {
+		return this.isCourse ? this.type + this.ssid : "";
+	}
+	
+	this.clone = function () {
+		return new TimeInterval_Argument (this.code, this.type, this.ssid, this.venue);
+	}
+}
+
+TimeInterval_Argument.compare = function (a, b) {
+	return sgn(a.code, b.code) || sgn(a.type, b.type) || sgn(a.ssid, b.ssid) || sgn(a.venue, b.venue);
+}
+
+//--------------------------------------------------------------------------
+// A time interval.
+// Properties:
+//  - day:   Mon - Sun
+//  - start: Start time (09:00 - 22:30)
+//  - end:   End time (09:20 - 22:50)
+//  - arg:   Additional arguments (e.g. Course code, Session and Room number)
+
+function TimeInterval (k, st, et, arg) {
+
+	this.day = k;
+	this.start = st;
+	this.end = et;
+	this.arg = arg;
+//	this.audit = !!audit;
+	
+	this.toString = function (no_arg) {
+		return TimeInterval.week[this.day] + " " + TimeInterval.starttime[this.start] + "-" + TimeInterval.endtime[this.end] + (no_arg ? "" : " (" + this.arg.toString() + ")");
+	}
+	
+	this.intersect = function (ts) {
+		return (ts.day == this.day) && (this.start <= ts.end && ts.start <= this.end || this.start >= ts.end && ts.start >= this.end);
+	}
+	
+	this.time_equal = function (ts) {
+		return ts.day == this.day && ts.start == this.start && ts.end == this.end;
+	}
+	
+	this.clone = function () {
+		return new TimeInterval (this.day, this.start, this.end, this.arg.clone());
+	}
+	
+	// return the interval "this" subtracts "ts".
+	this.cut_away = function (ts) {
+		if (ts.day == this.day) {
+			if (ts.start <= this.start) {
+				if (ts.end >= this.end)
+					return [];
+				else if (ts.end >= this.start)
+					return [new TimeInterval(this.day, ts.end+1, this.end, this.arg)];
+				else
+					return [this];
+			} else if (ts.end >= this.end) {
+				if (ts.start > this.end)
+					return [this];
+				else
+					return [new TimeInterval(this.day, this.start, ts.start-1, this.arg)];
+			} else {	// ts.start > this.start && ts.end < this.end
+				return [new TimeInterval(this.day, this.start, ts.start-1, this.arg), new TimeInterval(this.day, ts.end+1, this.end, this.arg)];
+			}
+		} else
+			return [this];
+	}
+}
+
+TimeInterval.compare = function (a, b) { return a.day - b.day || a.start - b.start || a.end - b.end; }
+
+TimeInterval.week = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+TimeInterval.starttime = ['09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30', '13:00', '13:30', '14:00', '14:30', '15:00', '15:30', '16:00', '16:30', '17:00', '17:30', '18:00', '18:30', '19:00', '19:30', '20:00', '20:30', '21:00', '21:30', '22:00', '22:30'];
+TimeInterval.starttime[-4] = '07:00';
+TimeInterval.starttime[-3] = '07:30';
+TimeInterval.starttime[-2] = '08:00';
+TimeInterval.starttime[-1] = '08:30';
+TimeInterval.endtime = ['09:20', '09:50', '10:20', '10:50', '11:20', '11:50', '12:20', '12:50', '13:20', '13:50', '14:20', '14:50', '15:20', '15:50', '16:20', '16:50', '17:20', '17:50', '18:20', '18:50', '19:20', '19:50', '20:20', '20:50', '21:20', '21:50', '22:20', '22:50'];
+TimeInterval.endtime[-4] = '07:20';
+TimeInterval.endtime[-3] = '07:50';
+TimeInterval.endtime[-2] = '08:20';
+TimeInterval.endtime[-1] = '08:50';
+
+//--------------------------------------------------------------------------
+// "Timeslots" hold a collection of time intervals, representing a section of course.
+// APIs:
+//  - fill:       Add human-readable time interval data (e.g. Mon,Wed,Fri ; 15:00-15:50) to the timeslot.
+//  - add:        Add all intervals from another timeslot to this timeslot.
+//  - try_add_ex: Test if the two timeslots have conflicts, and returns the array of TimeInterval_Argument in conflict.
+//  - add_audit:  Add all intervals from another timeslot to this timeslot -- split/delete the new intervals if necessary.
+// Properties:
+//  - intervals: The list of time intervals. Guaranteed to be sorted and disjoint.
+
+function Timeslots (ds, ti, ar) {
+	
+	var week = {'Mon': 0, 'Tue': 1, 'Wed': 2, 'Thu': 3, 'Fri': 4, 'Sat': 5, 'Sun': 6};
+	var starttime = {'07:00': -4, '07:30': -3, '08:00': -2, '08:30': -1, '09:00': 0, '09:30': 1, '10:00': 2, '10:30': 3, '11:00': 4, '11:30': 5, '12:00': 6, '12:30': 7, '13:00': 8, '13:30': 9, '14:00': 10, '14:30': 11, '15:00': 12, '15:30': 13, '16:00': 14, '16:30': 15, '17:00': 16, '17:30': 17, '18:00': 18, '18:30': 19, '19:00': 20, '19:30': 21, '20:00': 22, '20:30': 23, '21:00': 24, '21:30': 25, '22:00': 26, '22:30': 27};
+	var endtime = {'07:20': -4, '07:50': -3, '08:20': -2, '08:50': -1, '09:20': 0, '09:50': 1, '10:20': 2, '10:50': 3, '11:20': 4, '11:50': 5, '12:20': 6, '12:50': 7, '13:20': 8, '13:50': 9, '14:20': 10, '14:50': 11, '15:20': 12, '15:50': 13, '16:20': 14, '16:50': 15, '17:20': 16, '17:50': 17, '18:20': 18, '18:50': 19, '19:20': 20, '19:50': 21, '20:20': 22, '20:50': 23, '21:20': 24, '21:50': 25, '22:20': 26, '22:50': 27};
+	
+	function _fill (d, st, et, arg) {
+		var i = 0, j, k;
+		
+		for (; i < d.length; ++ i) {
+			k = week[d[i]];
+			for (j = st; j <= et; ++j)
+				This.intervals[k][j] = arg;
+			This.intervals.push (new TimeInterval(k, st, et, arg));
+		}
+	}
+	
+	function _add_audit (ti) {
+		var new_intervals = [ti];
+		var start = -1, end = -1;
+		var l = This.intervals.length;
+		var phase = 0;
+		
+		// phase A: find all intervals that intersect with ti.
+		for (var i = 0; i < l; ++i) {
+			if (phase == 0 && ti.intersect(This.intervals[i])) {
+				start = end = i;
+				phase = 1;
+			} else if (phase == 1 && !ti.intersect(This.intervals[i])) {
+				end = i;
+				break;
+			}
+		}
+		if (phase == 1)
+			end = l;
+		
+		// no intersect -- just add the interval.
+		if (start == -1) {
+			//var x = ti.clone();
+			//x.audit = true;
+			This.intervals.push(ti.clone());
+		} else {
+			for (var i = start; i < end; ++ i) {
+				var p = new_intervals.pop();
+				if (p)
+					new_intervals = new_intervals.concat( p.cut_away(This.intervals[i]) );
+				else
+					return;
+			}
+			
+			/*
+			for (var i = new_intervals.length-1; i >= 0; -- i)
+				new_intervals[i].audit = true;
+			*/
+			
+			This.intervals = This.intervals.concat(new_intervals);
+		}
+	}
+	
+	var This = this;
+		
+	this.fill = function (days, timeint, arg) {
+		if (days == "TBA" || timeint == "TBA")
+			return "No time table";
+	
+		var d = days.split (',');
+		var st = starttime[timeint.substr(0,5)];
+		var et = endtime[timeint.substr(6)];
+		
+		var i = 0, j, k;
+		
+		var ti = [], ni = this.intervals.length;
+		
+		var x;
+		
+		for (; i < d.length; ++ i) {
+			k = week[d[i]];
+			x = new TimeInterval (k, st, et, arg);
+			for (j = 0; j < ni; ++ j)
+				if (x.intersect(this.intervals[j]))
+					return "Time clash (" + arg.toString() + " and " + this.intervals[j].arg.toString() + ")";
+			ti.push (x);
+		}
+		
+		this.intervals = this.intervals.concat(ti);
+		this.intervals.sort (TimeInterval.compare);
+		
+		return "Done filling";
+	}
+	
+	this.add = function (ts) {
+		if (ts instanceof Timeslots) {
+			
+			var trial_result = this.try_add_ex(ts);
+			if (trial_result.length == 2) {
+				return "Time clash (" + trial_result[0].toString() + " and " + trial_result[1].toString() + ")";
+			}
+			
+			this.intervals = this.intervals.concat (ts.intervals);
+			this.intervals.sort (TimeInterval.compare);
+			
+			return "Done adding";
+		
+		} else
+			return "Not timeslots";
+	}
+	
+	this.try_add_ex = function (ts) {
+		if (ts instanceof Timeslots) {
+		
+			var i = 0, j;
+			for (; i < ts.intervals.length; ++ i) {
+				for (j = 0; j < this.intervals.length; ++ j) {
+					if (ts.intervals[i].intersect(this.intervals[j]))
+						return [ts.intervals[i].arg, this.intervals[j].arg];
+				}
+			}
+			
+			return [];
+		
+		} else
+			return [null];
+	}
+	
+	this.add_audit = function (ts) {
+		if (ts instanceof Timeslots) {
+			var i = 0, l = ts.intervals.length;
+			
+			for (; i < l; ++ i)
+				_add_audit (ts.intervals[i]);
+			
+			this.intervals.sort (TimeInterval.compare);
+			
+			return "Done adding";
+		} else
+			return "Not timeslots";
+	}
+	
+	this.toString = function (no_arg) {
+		var s = "", l = this.intervals.length;
+		if (l > 0) {
+			s = this.intervals[0].toString(no_arg);
+			for (var i = 1; i < l; ++ i)
+				s += "\n" + this.intervals[i].toString(no_arg);
+		}
+		return s;
+	}
+	
+	this.equal = function (ts) {
+		if (ts instanceof Timeslots)
+			if (this.intervals.length == ts.intervals.length) {
+				for (var i = 0; i < this.intervals.length; ++ i)
+					if (!this.intervals[i].time_equal(ts.intervals[i]))
+						return false;
+				return true;
+			}
+			
+		return false;
+	}
+	
+	this.clone = function () {
+		var ts = new Timeslots();
+		ts.intervals = this.intervals.clone();
+		return ts;
+	}
+	
+	this.intervals = [];
+	this.arg = ar;
+	this.sid = "";
+	this.code = "";
+	
+	if (ds && ti && ar)
+		this.fill(ds, ti, ar);
+}
+
+//--------------------------------------------------------------------------
+// "Equivalent_Timeslot" is a collection of courses, i.e., a timetable.
+// APIs:
+//  - add:        Add all timeslots (courses) to the current equivalent timeslot (timetable).
+//  - try_add_ex: Try to add all timeslots to the current timetable (without actually recording the change), and return the (TimeInterval_Argument) conflicts.
+//  - toHTML:     Draw the timetable.
+// Properties:
+//  - timeslots: The list of timeslots
+//  - sections:  The object in the form CourseCode => [sid, [<Another section sharing the same timeslot>], ...]
+
+function Equivalent_Timeslot (ts) {
+	this.timeslots = ts.clone();
+	this.sids = {};
+	
+	this.has_saturday = false;
+	this.has_sunday = false;
+	
+	// this records the section ids of the courses in the timetable.
+	this.sids[ts.code] = [ts.sid];
+	
+	this.add = function (ts2) {
+		if (ts2 instanceof Equivalent_Timeslot)
+			if (this.timeslots.add (ts2.timeslots) == "Done adding") {
+				for (var i in ts2.sids)
+					this.sids[i] = ts2.sids[i];
+				return true;
+			}
+		return false;
+	}
+	
+	this.add_audit = function (ts2) {
+		if (ts2 instanceof Equivalent_Timeslot)
+			if (this.timeslots.add_audit (ts2.timeslots) == "Done adding") {
+				for (var i in ts2.sids)
+					this.sids[i] = ts2.sids[i];
+				return true;
+			}
+		return false;
+	}
+	
+	this.try_add_ex = function (ts2) {
+		var conflicts = [];
+		if (ts2 instanceof Equivalent_Timeslot) {
+			var subconflicts = this.timeslots.try_add_ex (ts2.timeslots);
+			if (subconflicts.length)
+				conflicts.push(subconflicts);
+			else
+				return [];
+		}
+		return conflicts;
+	}
+	
+	this.clone = function () {
+		var et = new Equivalent_Timeslot(this.timeslots);
+		et.sids = {};
+		for (var i in this.sids)
+			et.sids[i] = this.sids[i].clone();
+		et.code = this.code;
+		return et;
+	}
+	
+	this.toHTML = function (detailed) {
+		var ti = this.timeslots.intervals, t;
+		var i, ii;
+		
+		// Check Saturday & Sunday.
+		var sat = ti.length && (ti[ti.length - 1].day >= 5);
+		var sun = ti.length && (ti[ti.length - 1].day == 6);
+		
+		// Check after 1900 & before 0900
+		var after1900 = false, before0900 = false;
+		for (i = 0; i < ti.length; ++ i) {
+			if (!after1900 && ti[i].end >= 20)	// 1920
+				after1900 = true;
+			if (!before0900 && ti[i].start < 0) // 0900
+				before0900 = true;
+			if (before0900 && after1900)
+				break;
+		}
+		
+		//
+		var tbl_length = 20, tbl_start = 0;
+		if (after1900) tbl_length = 28;
+		if (before0900) tbl_start = -4;
+		
+		var tbl = new Array (tbl_length);	// each entry is a string to each row.
+		var tbl_filled = new Array (tbl_length);
+		var last_day = 0;
+		
+		// (1) Fill the left headers (the time markers)
+		// (2) initialize the tbl_filled array.
+		for (i = 0; i < tbl_length - tbl_start; ++ i) {
+			tbl[i] = (detailed ? ((i & 1) ? '<th class="even_row">' : '<th>') +
+				TimeInterval.starttime[i + tbl_start] + '-' + TimeInterval.endtime[i + tbl_start] + '</th>' : '');
+			tbl_filled[i] = false;
+		}
+		
+		// now tbl_length holds the actual length.
+		tbl_length -= tbl_start;
+		
+		// for each interval in the timeslot,
+		for (i = 0; i < ti.length; ++ i) {
+			t = ti[i];
+			
+			// if the timeslot is in a day not reached, prepend with empty cells.
+			while (t.day > last_day) {
+				for (ii = 0; ii < tbl_length; ++ ii) {
+					if (!tbl_filled[ii])
+						tbl[ii] += '<td></td>';
+					else
+						tbl_filled[ii] = false;
+				}
+				++ last_day;
+			}
+			
+			var bgc = backgroundColors[t.arg.code];
+			
+			tbl[t.start - tbl_start] += '<td rowspan="' + (t.end - t.start + 1) +
+											'" style="background-color:' + bgc +
+											';color:' + getTextColorFromBG(bgc) + // new in Aug 03, 2008
+											';border-color:' + darker_mul(bgc) + // new in Aug 03, 2008
+											';" class="filled' + (auditing[t.arg.code] ? ' audit' : '') + '">' +
+											(detailed ? (
+												(auditing[t.arg.code] ? '<div class="audit_container"><span class="audit_text">[Audit]</span></div>' : '') + t.arg.toHTML()
+											) : '') +
+										'</td>';
+			for (ii = t.start; ii <= t.end; ++ ii)
+				tbl_filled[ii - tbl_start] = true;
+		}
+				
+		while (last_day < (sat + sun + 5)) {
+			for (ii = 0; ii < tbl_length; ++ ii) {
+				if (!tbl_filled[ii])
+					tbl[ii] += '<td></td>';
+				else
+					tbl_filled[ii] = false;
+			}
+			++ last_day;
+		}
+		
+		var table = tbl.join ('</tr><tr>');
+		if (detailed)
+			table = '<tr class="weekdays"><th></th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th>' + (sat ? '<th>Sat</th>' : '') + (sun ? '<th>Sun</th>' : '') + '</tr><tr>' + table;
+		table = '<table class="' + (detailed ? 'detailed_table' : 'small_table') + '">' + table + '</tr></table>';
+		
+		this.has_saturday = sat;
+		this.has_sunday = sun;
+		
+		return table;
+	}
+}
+var backgroundColors = {};
+var auditing = {};
+var requiring = {};
+
+//--------------------------------------------------------------------------
+// "Equivalent_Timeslots" hold a collection of timetables. This is the
+//   object we want to compute after all.
+// APIs:
+//  - add:  Add a single course section (Timeslots) to the equivalent timeslot.
+//          If the section is already added in one of the timetables, just append the information to that timetable.
+//          Otherwise, spawn a new timetable and add only that course section.
+//  - multiply: Multiply an Equivalent_Timeslots/Timeslots to the current one.
+//              If the argument is an Equivalent_Timeslots, derive all possibilities of combining the two Equivalent_Timeslots --
+//               i.e. find the subset of timetables (Equivalent_Timeslot) that no time conflict occur. Then the current object
+//               will carry the combined timetables.
+//              If the argument is a Timeslots, simply add the course section to all Equivalent_Timeslot in the object and dispose
+//               those with time conflict.
+//  - try_multiply:    Test if multiply succeeds.
+//  - try_multiply_ex: try_multiply with time conflict information.
+//  - combine:         Same as multiply, but adding the possibility that the new timetables can be ignored.
+//  - combine_ignore:  Same as cobime, but adding the possibility that the existing timetables can be ignored.
+// Properties:
+//  - _:    An array of Equivalent_Timeslot (timetables).
+
+
+function Equivalent_Timeslots () {
+	this._ = [];
+	
+	this.add = function (ts) {
+		if (ts instanceof Timeslots) {
+
+			// go through all timetables.
+			for (var i = 0; i < this._.length; ++ i)
+				// if one of them is equivalent to our test course,
+				if (this._[i].timeslots.equal(ts)) {
+					// define they are the same.
+					this._[i].sids[ts.code].push(ts.sid)
+					return;
+				}
+			// if not, this is a new timetable.
+			this._.push (new Equivalent_Timeslot(ts));
+		}
+	}
+	
+	this.multiply = function (ets) {
+		var l, ll, i, j, et, et1, et2;
+		
+		l = this._.length;
+	
+		// multiplying two sets of timetables.
+		if (ets instanceof Equivalent_Timeslots) {
+			// if our timetable set is empty, copy theirs.
+			if (!l)
+				this._ = ets._.clone();
+				
+			else {
+				ll = ets._.length;
+				// go through all of our timetables, and for each one, test against their timetables.
+				for (i = 0; i < l; ++ i) {
+					et = this._.shift();
+					for (j = 0; j < ll; ++ j) {
+						et1 = et.clone();
+						et2 = ets._[j];
+						// if no collision occurs, make the product ours.
+						if (et1.add(et2))
+							this._.push (et1);
+					}
+				}
+			}
+			
+			// return if any of the timetables survive.
+			return !!this._.length;
+		
+		// add a single timetable to our collection.
+		} else if (ets instanceof Timeslots) {
+		
+			et2 = new Equivalent_Timeslot(ets);
+			
+			if (!l)
+				this._ = [et2];
+			else 			
+				for (i = 0; i < l; ++ i) {
+					et1 = this._.shift();
+					if (et1.add(et2))
+						this._.push (et1);
+				}
+			
+			return !!this._.length;
+		
+		} else
+			return false;
+	}
+	
+	this.try_multiply = function (ets) {
+		var l, ll, i, j, et, et1, et2;
+		
+		l = this._.length;
+	
+		if (ets instanceof Equivalent_Timeslots) {
+			if (!l)
+				return !!ets._.length;
+			else {
+				ll = ets._.length;
+				for (i = 0; i < l; ++ i) {
+					et = this._[i];
+					for (j = 0; j < ll; ++ j) {
+						et1 = et.clone();
+						et2 = ets._[j];
+						if (et1.add(et2))
+							return true;
+					}
+				}
+			}
+			
+			return false;
+			
+		} else if (ets instanceof Timeslots) {
+
+			if (!l)
+				return true;
+			else {
+				et2 = new Equivalent_Timeslot(ets);
+				for (i = 0; i < l; ++ i) {
+					et1 = this._[i].clone();
+					if (et1.add(et2))
+						return true;
+				}
+			}
+			
+			return false;
+		
+		} else
+			return false;
+	}
+	
+	this.try_multiply_ex = function (ets) {
+		var l, ll, i, j, conflicts = [], subconflicts, et1, et2;
+		
+		l = this._.length;
+
+		if (ets instanceof Equivalent_Timeslots) {
+			if (!l)
+				return [];
+			else {
+				ll = ets._.length;
+				for (i = 0; i < l; ++ i) {
+					et1 = this._[i];
+					for (j = 0; j < ll; ++ j) {
+						et2 = ets._[j];
+						subconflicts = et1.try_add_ex(et2);
+						if (!subconflicts.length)
+							return [];
+						else
+							conflicts = conflicts.concat(subconflicts);
+					}
+				}
+			}
+			
+			return conflicts.sort(function(a,b){return TimeInterval_Argument.compare(a[0],b[0])});
+			
+		} else if (ets instanceof Timeslots) {
+
+			if (!l)
+				return true;
+			else {
+				et2 = new Equivalent_Timeslot(ets);
+				for (i = 0; i < l; ++ i) {
+					et1 = this._[i];
+					subconflicts = et1.try_add_ex(et2);
+					if (!subconflicts.length)
+						return [];
+					else
+						conflicts = conflicts.concat(subconflicts);
+				}
+			}
+			
+			return conflicts;
+		
+		} else
+			return [];
+	}
+	
+	this.combine = function (ets) {
+		var l = this._.length, ll, i, j, et, et1, et2;
+		var a = [];
+		var b = [];
+	
+		if (ets instanceof Equivalent_Timeslots) {
+			ll = ets._.length;
+			
+			if (!l) {
+				this._ = ets._.clone();
+				return;
+			}
+			
+			for (i = 0; i < l; ++ i) {
+				et = this._[i];
+				for (j = 0; j < ll; ++ j) {
+					et1 = et.clone();
+					et2 = ets._[j];
+					if (et1.add(et2))
+						a.push (et1);
+				}
+			}
+						
+			this._ = a.concat(this._);
+			
+		} else if (ets instanceof Timeslots) {
+			
+			et2 = new Equivalent_Timeslot(ets);
+			
+			if (!l) {
+				this._ = [et2];
+				return;
+			}
+			
+			for (i = 0; i < l; ++ i) {
+				et1 = this._[i];
+				if (et1.add(et2))
+					a.push (et1);
+			}
+			
+			this._ = a.concat(this._);
+		
+		} else
+			return false;
+	}
+	
+	this.combine_ignore = function (ets) {
+		var do_ignore = this._.length;
+	
+		this.combine(ets);
+		
+		if (do_ignore) {
+			if (ets instanceof Equivalent_Timeslots) {
+				var ll = ets._.length;
+				for (j = 0; j < ll; ++ j)
+					this._.push (ets._[j].clone());
+				
+			} else if (ets instanceof Timeslots) {
+				this._.push(new Equivalent_Timeslot(ets));
+			
+			} else
+				return false;
+		}
+	}
+	
+	this._add_audit = function (et) {
+		if (et instanceof Equivalent_Timeslot) {
+	
+			var l = this._.length;
+			var i;
+			
+			if (!l) {
+				//et.auditize();
+				this._ = [et];
+			} else {
+				for (i = 0; i < l; ++ i) {
+					this._[i].add_audit(et);
+				}
+			}
+		}
+	}
+	
+	
+	
+	this.multiply_audit = function (ets) {
+		if (ets instanceof Timeslots)
+			this._add_audit (new Equivalent_Timeslot(ets));
+		else if (ets instanceof Equivalent_Timeslots) {
+			var l2 = ets._.length;
+			
+			var copies = new Array(l2);
+			for (var i = 0; i < l2; ++ i)
+				copies[i] = this._.clone();
+			
+			for (var i = 0; i < l2; ++ i) {
+				this._ = copies[i];
+				this._add_audit (ets._[i]);
+				copies[i] = this._;
+			}
+			
+			this._ = Array.prototype.concat.apply([], copies);
+		}
+	}
+	
+	this.clone = function () {
+		var ets = new Equivalent_Timeslots();
+		ets._ = this._.clone();
+		return ets;
+	}
+}
+
+var CurrentETS = new Equivalent_Timeslots();
+
+//---------------------------------
+
+// this is a course vector.
+function Vector (d) {
+	var a = d.replace(/[^-:0-9.]/g, '').split (/[-:]/);
+	this.lectures = a[0] - 0;
+	this.tutorials = a[1] - 0;
+	this.labs = a[2] - 0;
+	this.credits = a[3] - 0;
+	
+	this.toString = function () {
+		return "[" + this.lectures + "-" + this.tutorials + "-" + this.labs + ":" + this.credits + "]";
+	}
+	
+	this.clone = function () {
+		var v = new Vector('');
+		v.lectures = this.lectures;
+		v.tutorials = this.tutorials;
+		v.labs = this.labs;
+		v.credits = this.credits;
+		return v;
+	}
+}
+
+//---------------------------------
+
+// a course quota.
+function Quota (quota, enroll, rsvd, vac) {
+	this.quota = quota;
+	this.enroll = enroll;
+	this.reserved = rsvd;
+	this.vacancy = vac;
+	
+	this.clone = function () {
+		return new Quota (this.quota, this.enroll, this.reserved, this.vacancy);
+	}
+}
+
+function Quotas (dept, quota, enroll, rsvd, vac, wait) {
+	this.waitlist = wait;
+	this._ = {};
+	this.totalQuota = 0;
+	
+	if (dept && dept != "Total" && dept.substr(0,4) != "   -") {
+		this._[dept] = new Quota(quota, enroll, rsvd, vac);
+		this.totalQuota += quota;
+	}
+	
+	this.add = function (dept, quota, enroll, rsvd, vac) {
+		if (dept && !(dept in this._) && dept != "Total" && dept.substr(0,4) != "   -") {
+			this._[dept] = new Quota (quota, enroll, rsvd, vac);
+			this.totalQuota += quota;
+		}
+	}
+	
+	this.clone = function () {
+		var q = new Quotas ("", 0, 0, 0, 0, this.waitlist);
+		for (var i in this._)
+			q._[i] = this._[i].clone();
+		q.totalQuota = this.totalQuota;
+		return q;
+	}
+	
+	this.toHTML = function () {
+		var depts = [], quotas = [], enrolls = [], reserves = [], vacancies = [];
+		
+		for (var i in this._) {
+			var quota = this._[i];
+		
+			depts.push(i);
+			quotas.push(quota.quota);
+			enrolls.push(quota.enroll);
+			reserves.push(quota.reserved);
+			vacancies.push(
+				10*quota.vacancy < quota.quota ?
+					'<span title="' + Math.round(100*quota.vacancy/quota.quota) + '% free space left!" class="not_enough_freespace">' + quota.vacancy + '&nbsp;&nbsp;</span>':
+					quota.vacancy
+			);
+		}
+		return "<td>" + depts.join("<br />") + "</td><td>" + quotas.join("<br />") + "</td><td>" +
+				enrolls.join("<br />") + "</td><td>" + reserves.join("<br />") + "</td><td>" + vacancies.join("<br />") +
+				"</td><td>" +
+					(10*this.waitlist > this.totalQuota ?
+						'<span title="Waitlist ' + Math.round(100*this.waitlist/this.totalQuota) + '% overloaded!" class="too_much_waitlist">' + this.waitlist + '&nbsp;&nbsp;</span>':
+						this.waitlist
+					) +
+				"</td>";
+	}
+}
+
+//---------------------------------
+
+function Department () {
+	this.lastUpdate = new Date();
+	this.courses = {};
+	this.coursesCount = 0;
+};
+
+//---------------------------------
+
+function Course (courseTitle) {
+	this.code = courseTitle[0];
+	this.title = courseTitle[1];
+	this.vector = new Vector(courseTitle[2]);
+	
+	this.matchingRules = 0;
+	if (courseTitle.length > 3 && courseTitle[3].indexOf('matching') != -1) {
+		if (courseTitle[3].indexOf('lecture') != -1)
+			this.matchingRules |= 1;
+		if (courseTitle[3].indexOf('tutorial') != -1)
+			this.matchingRules |= 2;
+		if (courseTitle[3].indexOf('laboratory') != -1)
+			this.matchingRules |= 4;
+	}
+	
+	this.sections = {};
+	this.subsections = {L:{},T:{},LA:{},'**':{}};
+	this.additionalWaitlists = {L:0,T:0,LA:0,'**':0};
+	
+	this.description = "";
+	
+	this.equivalent_timeslots = new Equivalent_Timeslots();
+	
+	this.computeSections = function () {
+		var local_lecture_sections = {};
+		var local_tutorial_sections = {};
+		var sect, ssid, sect2;
+		var lec_sid, tut_sid;
+		
+		this.sections = {};
+		
+		// find all lectures
+		for (ssid in this.subsections.L) {
+			local_lecture_sections[ssid] = new Section(this.subsections.L[ssid], this.code);
+		}
+		
+		// no lectures at all! just dump all tutorials.
+		if (isEmpty(local_lecture_sections)) {
+			for (ssid in this.subsections.T)
+				local_tutorial_sections['`' + ssid] = new Section(this.subsections.T[ssid], this.code);
+		} else {
+			// ensure there are tutorials to add...
+			if (!isEmpty(this.subsections.T)) {
+				
+				// if *no* matching rule against lecture & tutorial, we do Cartesian product.
+				// otherwise, we filter out those which Subsection.isMatch returns false.
+				for (lec_sid in local_lecture_sections) {
+					sect2 = local_lecture_sections[lec_sid];
+					for (ssid in this.subsections.T) {
+						if ((3 & ~this.matchingRules) || Subsection.isMatch(ssid, sect2.L)) {
+							sect = new Section(this.subsections.T[ssid], this.code);
+							sect.add(sect2);
+							local_tutorial_sections[lec_sid + '`' + ssid] = sect;
+						}
+					}
+				}
+				
+			// if there is no tutorials, just copy the lecture sections
+			} else
+				for (lec_sid in local_lecture_sections)
+					local_tutorial_sections[lec_sid + '`'] = local_lecture_sections[lec_sid];
+		}
+		
+		// do the same for labs...
+		if (isEmpty(local_tutorial_sections)) {
+			for (ssid in this.subsections.LA)
+				this.sections['``' + ssid] = new Section(this.subsections.LA[ssid], this.code);
+		} else {
+		
+			if (!isEmpty(this.subsections.LA)) {
+			
+				for (tut_sid in local_tutorial_sections) {
+					sect2 = local_tutorial_sections[tut_sid];
+					for (ssid in this.subsections.LA) {
+						if ( ((5 & ~this.matchingRules) || Subsection.isMatch(ssid, sect2.L)) && ((6 & ~this.matchingRules) || Subsection.isMatch(ssid, sect2.T)) ) {
+							sect = new Section(this.subsections.LA[ssid], this.code);
+							sect.add(sect2);
+							this.sections[tut_sid + '`' + ssid] = sect;
+						}
+					}
+				}
+			
+			} else
+				for (tut_sid in local_tutorial_sections)
+					this.sections[tut_sid + '`'] = local_tutorial_sections[tut_sid];
+		
+		}
+		
+		// all ** subsections are by themselves. they're usually XXXX-799 courses
+		for (ssid in this.subsections['**'])
+			this.sections['**' + ssid] = new Section(this.subsections['**'][ssid], this.code);
+		
+		// construct the global equivalent timeslots.
+		for (var sid in this.sections) {
+			this.equivalent_timeslots.add(this.sections[sid].timeslots);
+		}
+	}
+}
+
+//------------------------------------
+
+// a subsection is a lecture, or tutorial, or lab section.
+// it is the atomic element of a course.
+function Subsection (code, origssid, type, number, letter, group, quota, enroll, resv, vac, wait, days, time, venue, instr) {
+	this.type = type;
+	this.number = number;
+	this.letter = letter;
+	this.quotas = new Quotas(group, quota, enroll, resv, vac, wait);
+	
+	// ssid = subsection ID.
+	this.ssid = origssid;
+	
+	this.venue = venue;
+	this.instructor = instr;
+	
+	this.timeslots = new Timeslots(days, time, new TimeInterval_Argument(code, type, origssid, venue));
+	
+	this.remarks = "";
+}
+
+Subsection.isMatch = function (ssid1, ssid2) {
+	/*if (ssid1 == ssid2)
+		return true;
+	else {
+		var letter1 = ssid1.search(/[A-Z]/i);
+		var letter2 = ssid2.search(/[A-Z]/i);
+		if (letter1 < 0 && letter2 >= 0)
+			return ssid1 == ssid2.substr(0, letter2);
+		else if (letter1 >= 0 && letter2 < 0)
+			return ssid2 == ssid1.substr(0, letter1);
+		else
+			return false;
+	}*/
+	return ssid1.replace(/[A-Z]/ig, '') == ssid2.replace(/[A-Z]/ig, '');
+}
+
+function Section(newsubsection, course_code) {
+	this.L = "";
+	this.T = "";
+	this.LA = "";
+	this["**"] = "";
+	this._ = [];
+	this.timeslots = null;
+	this.remarks = "";
+	this.code = course_code;
+	
+	this.add = function (subsect) {
+		if (subsect instanceof Subsection) {
+			this._.push(subsect);
+			this[subsect.type] = subsect.ssid;
+			this.remarks += subsect.remarks + "\n\n";
+		} else if (subsect instanceof Section) {
+			this._ = this._.concat(subsect._);
+			for (var type in FULLNAME)
+				if (subsect[type])
+					this[type] = subsect[type];
+			this.remarks += subsect.remarks;
+		} else {
+			throw "Error: Section.add adding unknown stuff!";
+		}
+			
+		if (this.timeslots)
+			this.timeslots.add(subsect.timeslots);
+		else
+			this.timeslots = subsect.timeslots.clone();
+		this.timeslots.sid = this.toSid();
+		this.timeslots.code = this.code;
+		
+		if (/^\s+$/.test(this.remarks))
+			this.remarks = "";
+	}
+	
+	this.toString = function () {
+		if (this['**'])
+			return this['**'];
+		else {
+			var retval = "";
+			for (var type in ALLTYPES)
+				if (this[type])
+					retval += type + this[type] + " ";
+			return retval;
+		}
+	}
+	
+	this.toSid = function () {
+		if (this['**'])
+			return this['**'];
+		else
+			return this.L + '`' + this.T + '`' + this.LA;
+	}
+	
+	if (newsubsection instanceof Subsection)
+		this.add(newsubsection);
+}
+
+// convert 1`2`3 to L1 T2 LA3.
+if ("``".split(/`/).length == 3) {
+	Section.sidToArray = function (sid) { return sid.split(/`/); }	
+} else {
+	// IE ignores empty strings!
+	Section.sidToArray = function (sid) {
+		var a = sid.replace(/`/g, '_`_').split(/`/);
+		for (var i = a.length-1; i >= 0; --i)
+			a[i] = a[i].replace(/_/g, '');
+		return a;
+	}
+}
+
+Section.sidToString = function (sid) {
+	var a = Section.sidToArray(sid);
+	if (a.length != 3)
+		return sid;
+	else {
+		var retval = "";
+		if (a[0]) retval += " L" + a[0];
+		if (a[1]) retval += " T" + a[1];
+		if (a[2]) retval += " LA" + a[2];
+		return retval.substr(1);
+	}
+}
+
+
+//---------------------------------
+
+function EnrolledCourse (code, bgcolor, required, audit) {
+	this.code = code;
+	this.sections = [];
+	this.required = required;
+	this.audit = audit;
+	this.bgcolor = bgcolor;
+	
+	backgroundColors[code] = bgcolor;
+	auditing[code] = audit;
+	requiring[code] = required;
+	
+	this.toHTML = function () {
+		var src = '<tr>';
+	
+		if (this.required)
+			src += '<td title="Required course">+</td>';
+		else if (this.audit)
+			src += '<td title="Audit course">∗</td>';
+		else
+			src += '<td title="Elective course">−</td>';
+			
+		src += '<td><input type="radio" name="course_list_item" id="enr_' + this.code + '" /></td>';
+		
+		var label_tag = '<label for="enr_' + this.code + '">';
+				
+		src += '<td><label for="enr_' + this.code + '"><span class="courselist_label" style="background-color:' + this.bgcolor + ';color:' + getTextColorFromBG(this.bgcolor) + ';border:1px solid ' + darker_mul(this.bgcolor) + ';">' + this.code + '</span> ';
+		
+		if (this.sections.length == 1)
+			src += Section.sidToString(this.sections[0]) + '</label></td>';
+		else if (this.sections.length > 1)
+			src += '§§ × ' + this.sections.length + '</label></td>';
+		else
+			src += '</label></td>';
+		
+		return src + '</tr>';
+	}
+	
+	this.equivalent_timeslots = new Equivalent_Timeslots();
+	
+	this.makeEquivalentTimeslots = function () {
+		this.equivalent_timeslots = new Equivalent_Timeslots();
+		if (this.sections.length) {
+			var sections_to_remove = [];
+			for (var i = this.sections.length-1; i >= 0; --i) {
+				if (this.sections[i] in courses[this.code].sections) {
+					this.equivalent_timeslots.add(courses[this.code].sections[this.sections[i]].timeslots);
+				} else
+					sections_to_remove.push(i);
+			}
+			
+			var sr_len = sections_to_remove.length;
+			if (sr_len)
+				for (var i = 0; i < sr_len; ++ i)
+					this.sections.splice(sections_to_remove[i], 1);
+			
+			if (!this.sections.length)
+				this.equivalent_timeslots = courses[this.code].equivalent_timeslots;
+		} else {
+			this.equivalent_timeslots = courses[this.code].equivalent_timeslots;
+		}
+	}
+}
+
+function TimeBlock (title, bgcolor, days_arr, beg_index, end_index) {
+	title = escapeHTML(title);		// prevent malicious XSS.
+	
+	// to ensure each timeblock is uniquely defined.
+	// "!" is used here since its codepoint is U+0021, the first non-space character.
+	this.code = '!' + title + '@' + (new Date().getTime() + Math.random()).toString(36);
+
+	this.title = title;
+	this.bgcolor = bgcolor;
+	this.argument = new TimeInterval_Argument(this.code, title);
+	
+	backgroundColors[this.code] = bgcolor;
+	
+	var wds = [];
+	for (var wd = days_arr.length-1; wd >= 0; --wd)
+		wds.push(TimeInterval.week[days_arr[wd]]);
+	wds.reverse();
+	
+	this.days = days_arr;
+	if (beg_index <= end_index) {
+		this.begin = beg_index;
+		this.end = end_index;
+	} else {
+		this.begin = end_index;
+		this.end = beg_index;
+	}
+	
+	this.timeslots = new Timeslots(wds.join(','), TimeInterval.starttime[this.begin-4] + '-' + TimeInterval.endtime[this.end-4], this.argument);
+	this.timeslots.code = this.code;
+	this.timeslots.sid = this.title;
+	
+	this.equivalent_timeslots = new Equivalent_Timeslots();
+	this.equivalent_timeslots.add(this.timeslots);
+	
+	// just dummy functions & variables to match that of EnrolledCourse.
+	this.makeEquivalentTimeslots = function(){};
+	this.required = true;
+	this.audit = false;
+	
+	this.toHTML = function () {
+		return '<tr><td title="TimeBlock">■</td><td><input type="radio" name="course_list_item" id="enr_' + this.code +
+				'" /></td><td><label class="courselist_label" for="enr_' + this.code + '" style="background-color:' +
+				this.bgcolor + ';color:' + getTextColorFromBG(this.bgcolor) + ';border:1px solid ' + darker_mul(this.bgcolor) + ';">' +
+				this.title + '</label></td></tr>';
+	}
+}
+
+EnrolledCourse.compare = function (a, b) {
+	// we don't want LANG & LABU courses without preferences to fill up our lawn.
+	var crazydepts = /^LA(?:NG|BU)/;
+	// since the whole course list is strictly non-identical, we can ignore the equality test.
+	return b.required - a.required || a.audit - b.audit || crazydepts.test(a.code) - crazydepts.test(b.code) || (a.code < b.code ? -1 : 1);
+}
+
+//--------------------------------------------------------------------------
+
+function update_enrolled_courses_hash() {
+	enrolled_courses_hash = {};
+	
+	for (var i = enrolled_courses.length-1; i >= 0; --i) {
+		if (enrolled_courses[i] instanceof EnrolledCourse)
+			enrolled_courses_hash[enrolled_courses[i].code] = i;
+	}
+}
+
+//---------------------------------
+
+function cc_auditize (arr) {
+	for (var i = arr.length-1; i >= 0; --i)
+		if (auditing[arr[i].code])
+			arr[i] = arr[i].toString() + " (Audit)";
+	return arr;
+}
+
+function try_multiply_course (ets, main_part, code, sid) {
+	if (code in enrolled_courses_hash) {
+		var ec = enrolled_courses[enrolled_courses_hash[code]];
+		if (!sid || ec.sections.length == 0)
+			return '<del class="course_enrolled_indicator" title="enrolled:' + escapeHTML(cc_id(' ' + code, true)) + ' has been enrolled.">' + main_part + '</del>';
+		else {
+			// search for enrolled sections
+			if (sid.indexOf('`') != -1) {
+				if (ec.sections.lastIndexOf(sid) != -1)
+					return '<del class="course_enrolled_indicator" title="enrolled:' + escapeHTML(cc_id(' ' + code, true)) + ' (' + Section.sidToString(sid) + ') has been enrolled.">' + main_part + '</del>';
+			// search for enrolled subsections
+			} else {
+				var re;
+				if (sid.substr(0,2) == "LA") {
+					re = new RegExp('^\\w*`\\w*`' + sid.substr(2) + '$', 'i');
+				} else if (sid.charAt(0) == 'T') {
+					re = new RegExp('^\\w*`' + sid.substr(1) + '`\\w*$', 'i');
+				} else {
+					re = new RegExp('^' + sid.substr(1) + '`\\w*`\\w*$', 'i');
+				}
+				if (ec.sections.testPattern(re))
+					return '<del class="course_enrolled_indicator" title="enrolled:' + escapeHTML(cc_id(' ' + code, true)) + ' (' + sid + ') has been enrolled.">' + main_part + '</del>';
+			}
+		}
+	}
+
+	var trial_result = CurrentETS.try_multiply_ex(ets);
+	var trial_length = trial_result.length;
+
+	var aux_beg = '', abarr = [];
+	var aux_end = '';
+	
+	if (trial_length) {
+		var uniq_trial_result = [trial_result[0]];
+		var last_uniq_index = 0;
+		for (var i = 1; i < trial_length; ++ i) {
+			if (TimeInterval_Argument.compare(uniq_trial_result[last_uniq_index][0], trial_result[i][0]))
+				uniq_trial_result[++last_uniq_index] = trial_result[i];
+			else
+				uniq_trial_result[last_uniq_index].push(trial_result[i][1]);
+		}
+		
+		aux_beg = '<del class="course_collision_indicator" title="collision:Time clash:\n';
+		
+		for (var i = 0; i <= last_uniq_index; ++ i) {
+			abarr.push("&nbsp;• " + uniq_trial_result[i][0].toSection() + escapeHTML(cc_id(" ↮ " + cc_auditize(uniq_trial_result[i].slice(1).unique(TimeInterval_Argument.compare)).join(", "), true)));
+			
+			
+		}
+		aux_beg += abarr.join("\n") + '">';
+		
+		aux_end = '</del>';
+	}
+
+	return aux_beg + main_part + aux_end;
+}
+		
+//---------------------------------
+
+// phase 1: proxy to get the source code of department course list
+function get_department_1 (dept_code) {
+	if (locked)
+		return;
+	locked = true;
+
+	dept_code = dept_code.toLowerCase();
+	T["get_department::dept_code"] = dept_code;
+	ready = get_department_2;
+	var url = 'https://www.ab.ust.hk/wcr/intf/out/class/cr_class_' + dept_code + '.htm';
+	GET(url, M.GettingDept(dept_code, url));
+}
+
+// phase 2: clean up the course list source code
+function get_department_2 (s, c, t) {
+	if (c == 404) {
+		W(M.NoSuchDept(T["get_department::dept_code"]), true, true);
+		if (after_done)
+			after_done();
+		else
+			locked = false;
+		return;
+	}
+
+	var cleaned = s;
+	
+	// cleanup the source.
+	
+	cleaned = cleaned.replace(/<(?:script|style)[^\x00]+?<\/(?:script|style)>/gi, '');
+																			// strip all scripts & styles 
+	cleaned = cleaned.replace(/<\/?(?:font|img|strong|a|form|html|head|title|body|hr|div|center)[^>]*>/gi, '');
+																			// strip all useless tags.
+	cleaned = cleaned.replace(/<![^>]+>/gi, '');							// strip all comments & DOC-TYPES.
+	cleaned = cleaned.replace(/ (?:v?align|class)=[^\s>]+/gi, '');			// strip all alignment properties and classes
+	cleaned = cleaned.replace(/ nowrap/gi, '');
+	cleaned = cleaned.replace(/ (?:row|col)span="1"/gi, '');				// strip useless row/colspans.
+	cleaned = cleaned.replace(/<table[^>]+/gi, '<table');					// strip all table properties.
+	cleaned = cleaned.replace(/(?:&nbsp;\s+)+/gi, '`');						// handle human-readable separators.
+	cleaned = cleaned.replace(/\s{2,}/g, ' ');								// strip excessive spaces.
+	cleaned = cleaned.replace(/(`|>)\s/g, '$1');							// strip excessive spaces.
+	cleaned = cleaned.replace(/\s(`|<)/g, '$1');							// strip excessive spaces.
+	cleaned = cleaned.replace(/&nbsp;/gi, '');								// nbsp's are useless now.
+	cleaned = cleaned.replace(/<table><tr><td colspan="11">TBA: To be arranged<br><\/td><\/tr><\/table>/i, '');
+	cleaned = cleaned.replace(/ Class Quota \/ Schedule/i, '');				// get rid of useless info.
+	cleaned = cleaned.replace(/<table><tr><td><table>/i, '<table>');		// de-nest our main table.
+	cleaned = cleaned.replace(/<\/table><\/td><\/tr><\/table>/i, '</table>');// de-nest our main table.
+	cleaned = cleaned.replace(/<br[^>]*>/gi, '<br />\r\n');					// getText won't recognize <br/>, but \n.
+	
+	if (cleaned.indexOf('<table') == -1) {
+	    W(M.HTTPError(parseInt(cleaned,10), cleaned), false, true);
+	    after_done = null;
+	    locked = false;
+	    return;
+	}
+	
+	// now we have got 2 nicely stripped tables. Let's analyze them.
+	$TTA.innerHTML = cleaned;
+	
+	get_department_3();
+}
+
+// phase 3: analyze into subsections.
+// this is a huge function, so watch out.
+function get_department_3() {
+	var mainTable = $TTA.childNodes[1];	// I may add something to after the maintable :)
+
+	// compute the last update time.
+	var dept = new Department;
+	dept.lastUpdate = new Date(getText($TTA.firstChild.getElementsByTagName('td')[0]).match(/\d+-\w+-\d+\s\d+:\d+/)[0].replace(/-/g, ' '));
+		
+	// if there is some courses offered by this department, do the analysis.
+	if (getText(mainTable.rows[0].cells[0]) != "No matched class found.") {
+		var rowCount = mainTable.rows.length;
+		
+		// some course analysis variables.
+		var theCourse;
+		var theSubsection;
+		
+		// ***IsDirty = *** is being analyzed.
+		var theCourseIsDirty = false;
+		var theSubsectionIsDirty = false;
+		
+		// some variables for subsections.
+		var ssSSID, ssType, ssNum, ssLetter, ssGroup, ssQuota, ssEnroll, ssResv, ssVacancy;
+		var ssWaitlist, ssDays, ssTime, ssVenue, ssInstr;
+		
+		for (var row = 2; row < rowCount; ++ row) {
+			var thisRow = mainTable.rows[row];
+			
+			switch (thisRow.cells.length) {
+				// header row: this row gives the course code and stuff.
+				case 1: 
+					if (theSubsectionIsDirty) {
+						theCourse.subsections[theSubsection.type][theSubsection.ssid] = theSubsection;
+					} if (theCourseIsDirty) {
+						theCourse.computeSections();
+						dept.courses[theCourse.code] = courses[theCourse.code] = theCourse;
+						++dept.coursesCount;
+					}
+				
+					theCourse = new Course(getText(thisRow.cells[0]).split(/`/));
+					
+					theCourseIsDirty = true;
+					theSubsectionIsDirty = false;
+					
+					break;
+				
+				// first row of subsection.
+				case 12:
+					// there must be a course to contain the subsection!
+					if (!theCourseIsDirty)
+						throw "Error: The course is not dirty! (get_department_3,case=12)";
+					
+					// there was old subsection, let's push it in.	
+					if (theSubsectionIsDirty) {
+						theCourse.subsections[theSubsection.type][theSubsection.ssid] = theSubsection;
+					}
+					
+					ssSSID = getText(thisRow.cells[1]);	
+					ssType = getText(thisRow.cells[0]);
+					ssNum = parseInt(ssSSID, 10);
+					ssLetter = ssSSID.match(/[A-Z]*$/i)[0];
+					ssGroup = getText(thisRow.cells[2]);
+					ssQuota = getText(thisRow.cells[3]) >>> 0;
+					ssEnroll = getText(thisRow.cells[4]) >>> 0;
+					ssResv = getText(thisRow.cells[5]) >>> 0;
+					ssVacancy = getText(thisRow.cells[6]) >>> 0;
+					ssWaitlist = getText(thisRow.cells[7]) >>> 0;
+					ssDays = getText(thisRow.cells[8]);
+					ssTime = getText(thisRow.cells[9]);
+					ssVenue = getText(thisRow.cells[10]).replace(/\s+\([-\d]+\)/, '');
+					ssInstr = thisRow.cells[11].innerHTML;	// this one is for presentation only, so it's OK.
+					
+					theSubsection = new Subsection(theCourse.code, ssSSID, ssType, ssNum, ssLetter, ssGroup,
+													ssQuota, ssEnroll, ssResv, ssVacancy, ssWaitlist,
+													ssDays, ssTime, ssVenue, ssInstr);
+					theSubsectionIsDirty = true;
+					
+					break;
+				
+				// additional details for a subsection, e.g. more student groups and/or time intervals.
+				case 10:
+					if (!theCourseIsDirty)
+						throw "Error: The course is not dirty! (get_department_3,case=10)";
+					else if (!theSubsectionIsDirty)
+						throw "Error: The subsection is not dirty! (get_department_3,case=10)";
+					
+					ssGroup = getText(thisRow.cells[2]);
+					ssQuota = getText(thisRow.cells[3]) >>> 0;
+					ssEnroll = getText(thisRow.cells[4]) >>> 0;
+					ssResv = getText(thisRow.cells[5]) >>> 0;
+					ssVacancy = getText(thisRow.cells[6]) >>> 0;
+					ssDays = getText(thisRow.cells[7]);
+					ssTime = getText(thisRow.cells[8]);
+					ssVenue = getText(thisRow.cells[9]).replace(/\s+\([-\d]+\)/, '');
+					
+					// more student group, add quota.
+					if (ssGroup && ssGroup != "Total") {
+						theSubsection.quotas.add(ssGroup, ssQuota, ssEnroll, ssResv, ssVacancy);
+					}
+					
+					// more timeslots
+					if (ssDays) {
+						theSubsection.timeslots.fill(ssDays, ssTime, new TimeInterval_Argument(theCourse.code, ssType, ssSSID, ssVenue));
+					}
+					
+					break;
+				
+				// additional waitlist summary.
+				case 5:
+					if (!theCourseIsDirty)
+						throw "Error: The course is not dirty! (get_department_3,case=5)";
+					if (theSubsectionIsDirty)
+						theCourse.subsections[theSubsection.type][theSubsection.ssid] = theSubsection;
+					theSubsectionIsDirty = false;
+					
+					{
+						var wlType = getText(thisRow.cells[2]);
+						var wlWait = getText(thisRow.cells[3]) >>> 0;
+						
+						if (wlType.indexOf("Lecture") != -1)
+							theCourse.additionalWaitlists.L = wlWait;
+						else if (wlType.indexOf("Tutorial") != -1)
+							theCourse.additionalWaitlists.T = wlWait;
+						else if (wlType.indexOf("Laboratory") != -1)
+							theCourse.additionalWaitlists.LA = wlWait;
+					}
+						
+					break;
+				
+				// some remarks for the subsection.
+				case 9:
+					if (!theCourseIsDirty)
+						throw "Error: The course is not dirty! (get_department_3,case=9)";
+					else if (!theSubsectionIsDirty)
+						throw "Error: The subsection is not dirty! (get_department_3,case=9)";
+						
+					theSubsection.remarks = thisRow.lastChild.lastChild.rows[0].cells[1].innerHTML.replace(/&gt;/g, '\n').replace(/<br[^>]*>/g, '').replace(/^\n+/g, '');
+						
+					break;
+				
+				// class canceled. just ignore.
+				case 3:
+					break;
+					
+				default:
+					throw "Error: Case unhandled! (get_department_3)";
+					
+			}
+		}
+		
+		if (theSubsectionIsDirty)
+			theCourse.subsections[theSubsection.type][theSubsection.ssid] = theSubsection;
+		if (theCourseIsDirty) {
+			theCourse.computeSections();
+			dept.courses[theCourse.code] = courses[theCourse.code] = theCourse;
+			++dept.coursesCount;
+		}
+	}
+	
+	departments[T["get_department::dept_code"]] = dept;
+	
+	get_department_4(T["get_department::dept_code"]);
+	
+}
+
+// phase 4: proxy to get the source code of department course info.
+function get_department_4(dept) {
+	var url = 'http://www.ab.ust.hk/wcr/intf/out/class/cr_cour_' + dept + '.htm';
+	ready = get_department_5;
+	GET(url, M.GettingDept(dept, url));	// override default message.
+}
+
+// phase 5: clean up the course list source code
+function get_department_5(s,c,t) {
+	var cleaned = s;
+	
+	cleaned = cleaned.replace(/<(script|style|form)[^\x00]+?<\/\1>/gi, '');
+	cleaned = cleaned.replace(/<\/?(?:font|img|strong|a|link|html|head|title|body|hr|div|center|br)[^>]*>/gi, '');
+																			// strip all useless tags.
+	cleaned = cleaned.replace(/<![^>]+>/gi, '');							// strip all comments & DOC-TYPES.
+	cleaned = cleaned.replace(/ (?:v?align|class)=[^\s>]+/gi, '');			// strip all alignment properties and classes
+	cleaned = cleaned.replace(/ nowrap/gi, '');
+	cleaned = cleaned.replace(/ (?:row|col)span="1"/gi, '');				// strip useless row/colspans.
+	cleaned = cleaned.replace(/<table[^>]+/gi, '<table');					// strip all table properties.
+	cleaned = cleaned.replace(/&nbsp;&nbsp;/gi, '`');						// handle human-readable separators.
+	cleaned = cleaned.replace(/&nbsp;/gi, '');								// nbsp's are useless now.
+	cleaned = cleaned.replace(/\s{2,}/g, ' ');								// strip excessive spaces.
+	cleaned = cleaned.replace(/(`|>)\s/g, '$1');							// strip excessive spaces.
+	cleaned = cleaned.replace(/\s(`|<)/g, '$1');							// strip excessive spaces.
+	cleaned = cleaned.replace(/<td><\/td>/g, '');							// remove empty cells.
+	cleaned = cleaned.replace(/<table><tr><td><table>/gi, '<table>');		// de-nest all tables.
+	cleaned = cleaned.replace(/<\/table><\/td><\/tr><\/table>/gi, '</table>');// de-nest all tables.
+
+	$TTA.innerHTML = cleaned;
+
+	get_department_6();
+}
+
+// phase 6: extract the descriptions.
+function get_department_6() {
+	// phase 6: analyze the course list.
+	
+	var rows = $TTA.getElementsByTagName('table');
+	var rowCount = rows.length-4;
+	
+	// the 0th (title) and last 4 ("course n/a" & "no such course") tables are useless.
+	for (var row = 1; row < rowCount; row += 2) {
+		var code = getText(rows[row].rows[0].cells[0]).match(/^[^`]+/)[0];
+		if (code in courses) {
+			courses[code].description = getText(rows[row+1].rows[0].cells[0]).replace(/((?:(?:Pre|Co)requisite|Reference|Exclusion|Background)s?:)/g, '<br />&nbsp;• <em>$1</em>');
+		}
+	}
+
+	if (after_done)
+		after_done();
+	else {
+		locked = false;
+		W();
+	}
+}
+
+//---------------------------------
+
+function populate_preferred_sections (code) {
+	var src = [];
+	var lastsid;
+	
+	for (var sid in courses[code].sections) {	
+		var sect = courses[code].sections[sid];
+		var mainpart;
+		
+		var myTitle = sect.remarks ? ' title="' + sect.remarks + '"' : '';
+		var row = '<td' + myTitle + '><input type="checkbox" id="sect:' + sid + '" /></td>';
+		
+		if (sid.substr(0,2) == '**') {
+			lastsid = sid.substr(2);
+			mainpart = '<span class="highlightable">' + lastsid + '</span>';
+		} else {
+			lastsid = Section.sidToString(sid);
+			mainpart = '<span class="highlightable">' + lastsid.replace(/ /g, '</span> <span class="highlightable">') + '</span>';
+		}
+				
+		row += '<td' + myTitle + '><label for="sect:' + sid + '">' +
+				try_multiply_course(sect.timeslots, mainpart, code, sid) + '</label></td>';
+		
+		src.push(row);
+	}
+	
+	// split the array into groups of 10, so that navigation is easier.
+	var rows = ["","","","","","","","","",""];
+	var srcCount = src.length;
+	for (var i = 0; i < srcCount; ++ i) {
+		rows[i % 10] += src[i];
+	}
+	$PrefSectTable = setInnerHTML($PrefSectTable, '<tr>' + rows.join('</tr><tr>') + '</tr>');
+	
+	// in order to combat the ugly line-break in COMP-104 (which vast of choices and excessively long sid.)
+	var count_space = lastsid.indexOf(' ') != -1 ? lastsid.match(/ /g).length : 0;
+	var assumed_width = (24 + 9.5*(lastsid.length - 0.5*count_space)) * Math.ceil(srcCount*0.1);
+	if (assumed_width > 240)
+		$PrefSectTable.style.fontSize = (240/assumed_width) + 'em';
+	else
+		$PrefSectTable.style.fontSize = '';
+	
+	upgrade_tooltiptext($PrefSectTable);
+		
+	// hook the highlight methods.
+	var spans = $PrefSectTable.getElementsByTagName('span');
+	for (var i = spans.length-1; i >= 0; -- i) {
+		if (spans[i].className == 'highlightable') {
+			spans[i].onmouseover = highlight_waitlist_row;
+			spans[i].onmouseout = recover_waitlist_row;
+		}
+	}
+}
+
+
+$('select_all_sections').onclick = function clear_sections(e) {
+	var inputs = $PrefSectTable.getElementsByTagName('input');
+	for (var i = inputs.length-1; i >= 0; --i)
+		inputs[i].checked = true;
+}
+
+$('toggle_preferred_sections').onclick = function (e) {
+	var inputs = $PrefSectTable.getElementsByTagName('input');
+	for (var i = inputs.length-1; i >= 0; --i)
+		inputs[i].checked = !inputs[i].checked;
+}
+
+$('clear_all_sections').onclick = function clear_sections(e) {
+	var inputs = $PrefSectTable.getElementsByTagName('input');
+	for (var i = inputs.length-1; i >= 0; --i)
+		inputs[i].checked = false;
+}
+
+$CC.onkeydown = function (e) {
+	if (isTBMode)
+		return;
+
+	//scriptlet from http://www.quirksmode.org/js/events_properties.html#key
+	var code;
+	if (!e) var e = window.event;
+	if (e.keyCode) code = e.keyCode;
+	else if (e.which) code = e.which;
+	
+	if (code == 13) {	// enter
+		/*e.cancelBubble = true;
+		if (e.stopPropagation) e.stopPropagation();*/
+		setTimeout('prepare_course_1();', 0);
+	}
+}
+
+$CC.onkeyup = function (e) {
+	if (!isTBMode && $CC.value != $CC.oldValue) {
+		clearTable($PrefSectTable);
+	}
+	
+	$CC.oldValue = $CC.value;
+}
+
+var currentPage = "";
+$('confirm_cc').onclick = prepare_course_1;
+
+function normalize_course_code (code) { return code.replace(/[\W_]/g, '').toUpperCase() }
+
+function prepare_course_1 () {
+	var normalized_course_code = normalize_course_code($CC.value);
+	var dept = normalized_course_code.substr(0,4);
+	T["prepare_course::normalized_course_code"] = normalized_course_code;
+	T["prepare_course::dept"] = dept = dept.toLowerCase();
+	
+	if (dept in departments) {
+		prepare_course_2();
+	} else {
+		after_done = prepare_course_2;
+		get_department_1(dept);
+	}
+}
+
+function prepare_course_2() {
+	after_done = null;
+	locked = false;
+
+	var code = T["prepare_course::normalized_course_code"];
+
+	if (code in courses) {
+		populate_preferred_sections(code);
+		prepare_course_3();
+		W();
+	} else {
+		clearTable($PrefSectTable);
+		if (code.length != 4 || code.search(/\d/) >= 0) {
+			W(M.NoSuchCourse(code), true, true);
+		} else if (!is_dismissable_message) {
+			// it should be a valid department. 
+			W();
+			prepare_department_3();
+		}
+	}
+	
+	if (!is_dismissable_message) {
+		currentPage = T["prepare_course::normalized_course_code"];
+		location.hash = "#course:" + currentPage;
+	}
+	
+	delete T["prepare_course::normalized_course_code"];
+	delete T["prepare_course::dept"];
+}
+
+function prepare_course_3() {
+	var code = T["prepare_course::normalized_course_code"];
+	var course = courses[code];
+	var subsects = course.subsections;
+	var subsectlen = subsects.length;
+	
+	var src = ['<table><tr id="course_info_row"><td>' + code + ' — ' + course.title];
+	
+	var arg2 = "('" + T["prepare_course::dept"] + "', '" + code + "');";
+
+	src.push(' <input type="button" class="detail_button" title="Go to ' + T["prepare_course::dept"].toUpperCase() + ' department" value="⇧" id="official_quota_info" onclick="go_to_course(\'' + T["prepare_course::dept"] + '\');" />');	
+	src.push('<input type="button" class="detail_button" title="View official quota info" value="➲" id="official_quota_info" onclick="view_official_quota' + arg2 + '" />');
+	src.push('<input type="button" class="detail_button" title="Refresh quota" value="↻" id="refresh_quota" onclick="refresh_department' + arg2 + '" />');
+	
+	src.push('</td><td style="text-align:right;">' + course.vector + '</td></tr>');
+	src.push('<tr id="course_description_row"><td colspan="2">' + course.description + '</td></tr>');
+	src.push('<tr><td colspan="3"><table class="mouseovertable" id="course_waitlist_header"><tr><th>§</th><th>Group</th><th title="Quota">Qt</th><th title="Enrolled">En</th><th title="Reserved">Rs</th><th title="Free space">FS</th><th title="Wait list">WL</th><th>Schedule</th><th>Venue</th><th>Instructors</th></tr></table>')
+	src.push('<div id="course_waitlist_container"><table class="mouseovertable info_table" id="course_waitlist_table"><tbody>');
+	
+	for (var j in subsects) {
+		for (var i in subsects[j]) {
+			var subsect = subsects[j][i];
+			var type_ssid = (j == '**') ? j : j + i;
+			src.push('<tr id="wait:' + type_ssid + '"><th>' + try_multiply_course(subsect.timeslots, type_ssid, code, type_ssid) + '</th>');
+			src.push(subsect.quotas.toHTML());
+			src.push('<td>' + nl2br(subsect.timeslots.toString(true)) + '</td>');
+			src.push('<td>' + subsect.venue + '</td><td>' + subsect.instructor + '</td></tr>');
+			if (subsect.remarks)
+				src.push('<tr><td colspan="7" class="addwaitheader">Remarks:</td><td colspan="3">' + nl2br(subsect.remarks) + '</td></tr>');
+		}
+	}
+	
+	for (var j in course.additionalWaitlists) {
+		if (course.additionalWaitlists[j] > 0) {
+			src.push('<tr><td colspan="6" class="addwaitheader">Any ' + FULLNAME[j] + '</td><td>' + course.additionalWaitlists[j] + '</td><td colspan="3"></td></tr>');
+			addtext = "";
+		}
+	}
+	
+	src.push('</tbody><tfoot><tr><th>§</th><th>Group</th><th title="Quota">Qt</th><th title="Enrolled">En</th><th title="Reserved">Rs</th><th title="Free space">FS</th><th title="Wait list">WL</th><th>Schedule</th><th>Venue</th><th>Instructors</th></tr></tfoot></table></div></td></tr></table>');
+	
+	$Col3.innerHTML = cc_id(src.join(''));
+	
+	upgrade_tooltiptext($Col3);
+	window.onresize();
+}
+
+function prepare_department_3() {
+	var dept = T["prepare_course::dept"].toLowerCase();
+	
+	var src = [
+		'<p id="dept_courses_header">Last updated <strong>' + relativeDate(departments[dept].lastUpdate) +
+		'</strong> (' + departments[dept].lastUpdate.toLocaleString() + ')<br />' +
+		departments[dept].coursesCount + ' course(s) are offered by the ' + dept.toUpperCase() +
+		' department.</p><div id="dept_courses_container"><table class="mouseovertable info_table" id="dept_courses_table"><tbody>'
+	];
+	
+	for (var code in departments[dept].courses) {
+		var course = departments[dept].courses[code];
+				
+		src.push('<tr><td>' + code + '</td><td>' + course.title + '</td><td class="nowrap">' + course.vector + '</td></tr>');
+	}
+	
+	src.push('</tbody></table></div>'); // <tfoot><tr><th>Code</th><th>Title</th><th>Vector</th></tfoot></table></div>
+	
+	$Col3.innerHTML = cc_id(src.join(''));
+	
+	upgrade_tooltiptext($Col3);
+	window.onresize();
+}
+
+//--------------------------------------------
+
+function refresh_department(dept, course) {
+	delete departments[dept];
+	go_to_course(course);
+}
+
+function view_official_quota(dept, course) { window.open('https://www.ab.ust.hk/wcr/intf/out/class/cr_class_' + dept + '.htm#' + course, 'off_quo_win').focus(); }
+
+$('goto_course_reg').onclick = function () { window.open('https://www.ab.ust.hk/cgi-bin/std_rg_cgi.sh/WService=broker_ct_p/prg/cr_reg_main.r'); }
+
+//--------------------------------------------
+
+var sem_names = ["", "Fall", "Winter", "Spring", "Summer"];
+
+function get_sem_info () {
+	var d = new Date();
+	var y = d.getFullYear();
+	var m = d.getMonth();
+	var sem = 1;
+	var ry = y;
+	
+	if (m < 6) -- y;	// For June or before, the academic year should count as the previous one.
+	
+	sem = (m < 4) ? 3 : (m < 6) ? 4 : 1;
+
+	return [y, sem, sem_names[sem], ry];
+}
+
+function load_confirmed_enrollment_1 () {
+	ready = load_confirmed_enrollment_2;
+	
+	var a = get_sem_info();
+	var url = 'https://www.ab.ust.hk/cgi-bin/std_rg_cgi.sh/WService=broker_ct_p/prg/cr_rg_enrol_ta_intf.r?p_reg_acad_yr=' + a[0] + '&p_reg_semes_cde=' + a[1];
+	
+	GET (url, M.LoadingConfirmedEnrollment);
+}
+
+function load_confirmed_enrollment_2 (s, c, t) {
+	var re1 = /<LI>([^<]+)<BR>&nbsp;/;
+	var re2 = /id="xml" value="([^"]+)"/;    //" (fix Xcode)
+	var m;
+	var o;
+
+	if (c == 200) {
+	
+		if (s.indexOf('Your request cannot be completed') != -1) {
+		
+			m = re.exec(s);
+			
+			if (m && m[1])
+				W (M.LoadCEFailed(m[1]), true, true);
+			else
+				W (M.LoadCEFailed(), true, true);
+		
+		} else if (s.indexOf('This administrative service has been shut down for scheduled daily processing') != -1)
+		
+			W(M.LoadCEFailed('The administrative service has been shut down for scheduled daily processing'), true, true);
+		
+		else {
+		
+			m = re2.exec(s);
+			if (m && m[1]) {
+				translate_courses_xml(m[1]);
+			} else {
+				W(M.CEEmpty, true, true);
+			}
+		}
+	
+	} else
+		W (M.HTTPError(c, t), true, true);
+}
+
+function translate_courses_xml (xml) {
+	xml = unescapeHTML(xml);
+
+	var xmlDoc = null;
+	if (window.DOMParser) {
+		xmlDoc = new DOMParser().parseFromString(xml, "text/xml");
+	} else if (window.ActiveXObject) {
+		xmlDoc = new ActiveXObject("Microsoft.XMLDOM");
+		xmlDoc.async="false";
+		xmlDoc.loadXML(xml);
+	}
+	
+	var o = [];
+	
+	if (xmlDoc) {
+		var l, t, ta;
+		
+		var allCourses = xmlDoc.getElementsByTagName('course');
+		for (var i = allCourses.length-1; i >= 0; -- i) {
+			var course = allCourses[i];
+			var code = getText(course.getElementsByTagName('courseCode')[0]);
+			if (!/[A-Z]{4}\d{3}[A-Z]?/i.test(code))
+				continue;
+			
+			var color = num_to_color(getText(course.getElementsByTagName('color')[0]) >>> 0);
+
+			var l_tag = course.getElementsByTagName('L');
+			if (l_tag.length > 0)
+				l = getText(l_tag[0]);
+			else
+				l = "";
+			var t_tag = course.getElementsByTagName('T');
+			if (t_tag.length > 0)
+				t = getText(t_tag[0]);
+			else
+				t = "";
+			var la_tag = course.getElementsByTagName('LA');
+			if (la_tag.length > 0)
+				la = getText(la_tag[0]);
+			else
+				la = "";
+			o.push(["Course", code, "+", [l + "`" + t + "`" + la], color]);
+		}
+	} else {
+
+		var re3 = /<course><courseCode>(\w+)<\/courseCode>(?:<L>(\w+)<\/L&>)?(?:<LA>(\w+)<\/LA>)?(?:<T>(\w+)<\/T>)?<color>(\d+)<\/color><\/course>/g;
+		var m;
+		
+		var code, color, l, t, la;
+		var z = "000000";
+		
+		while (m = re3.exec(xml)) {
+			code = m[1];
+			color = num_to_color(m[5] >>> 0);
+			l = m[2] || "";
+			t = m[4] || "";
+			la = m[3] || "";
+			o.push(["Course", code, "+", [l + "`" + t + "`" + la], color]);
+		}
+	}
+	
+	T["analyze_course_list::all_courses"] = o;
+	T["fetch_all_courses::index"] = 0;
+		
+	fetch_all_courses();
+}
+
+
+$('load_enrolled_courses').onclick = load_confirmed_enrollment_1;
+
+//--------------------------------------------
+
+$('io_course_list').onclick = show_io_box;
+
+var IOBoxSrc = '<div id="iobox"><p>Copy the code below for later importing, or paste the exported code below to import the course list.</p>' +
+				'<p><textarea id="io_textarea" name="io_textarea"></textarea></p>' +
+				'<p id="io_panel">' +
+				'<input value="Import" id="io_import" name="io_import" type="button" /> ' +
+				'<input value="Close" id="io_cancel" name="io_cancel" type="button" />' +
+				'</p></div>';
+
+var ImportCodeHeader = '//@version=2@\n//\n// HKUST Timetable Manager 2 - Exported course list\n//\n' + 
+						'// This is an automatically generated file\n' +
+						'// Please save this *manually* to anywhere you like.\n';
+
+function get_course_list_code (without_comments) {
+	var l = enrolled_courses.length;
+	var o = [];
+	
+	var ec;
+	
+	for (var i = 0; i < l; ++ i) {
+		ec = enrolled_courses[i];
+		if (ec instanceof TimeBlock) {
+			o.push(
+				'!' + encodeURIComponent(ec.title) + '@' + ec.days.join(',') + '@' + ec.begin + '~' + ec.end + ':' + ec.bgcolor + ';'
+			);
+		} else {
+			o.push(
+				ec.code + (ec.required ? '+' : ec.audit ? '*' : '-') + ec.sections.join(",") +
+				':' + ec.bgcolor + ';' + (without_comments ? '' : (' // ' + courses[ec.code].title))
+			);
+		}
+	}
+
+	return o.join(without_comments ? "" : "\n");
+}
+
+function show_io_box () {
+	W(IOBoxSrc, false, true);
+
+	$('io_textarea').value = ImportCodeHeader + get_course_list_code(false);
+	$('io_textarea').select();
+	$('io_textarea').focus();
+	$('io_import').onclick = prepare_import;
+	$('io_cancel').onclick = hide_io_1;
+}
+
+function prepare_import() {
+	var s = $('io_textarea').value.replace(/\/\/.*/g, '').replace(/\s+/g, '');
+	
+	if (s.substr(0,8) == "SwapDrop" || s.substr(0,5) == "HKUST")
+		analyze_course_list_tta_1($('io_textarea').value);
+	else
+		analyze_course_list_1(s);
+}
+
+function analyze_course_list_tta_1(ttacode) {
+	var a = [];
+	
+	ttacode = ttacode.replace(/SwapDrop|HKUST/g, '').replace(/^\s+$/mg, '');
+	
+	var re = /^\s+(\w+)\s+([-\w]+)\s+([-\w]+)\s+([-\w]+)\s+$/mg;
+	var m;
+	var all_courses = [];
+	
+	while ((m = re.exec(ttacode))) {
+		var a = ["Course", m[1], "+"];
+		var sid;
+		sid = (m[2] == "-") ? "`" : m[2] + "`";
+		sid += (m[3] == "-") ? "`" : m[3] + "`"; 
+		if (m[4] != "-") sid += m[4];
+		a.push([sid]);
+		a.push(get_random_bgc());
+		all_courses.push(a);
+	}
+	
+	T["analyze_course_list::all_courses"] = all_courses;
+	T["fetch_all_courses::index"] = 0;
+	
+	fetch_all_courses();
+}
+
+function analyze_course_list_1(importcode) {
+	// convert importcode to a 2D array, in the form of [[timeblock/course, code/title, +-*/days, sid/beg, (end)], ...]
+	var thecourses = importcode.split(/;/);
+	
+	var re_course = /^(\w+)([-+*])([`,\w]*):([#\w]*)$/i;
+	var re_timeblock = /^!([^@]*)@([\d,]*)@([-\d]+)~([-\d]+):([#\w]*)$/i
+	
+	var course_disasm = [];
+	var all_courses = [], m;
+	
+	for (var i = thecourses.length-1; i >= 0; --i) {
+		var a = [];
+		if (thecourses[i].charAt(0) == "!") {
+			a.push();
+			m = re_timeblock.exec(thecourses[i]);
+			if (!m)
+				continue;
+			a = ["TimeBlock",
+				decodeURIComponent(m[1]),
+				m[2].split(/,/),
+				m[3] >> 0,
+				m[4] >> 0,
+				get_color(m[5])
+			];
+		} else {
+			m = re_course.exec(thecourses[i]);
+			if (!m)
+				continue;
+			a = ["Course",
+				normalize_course_code(m[1]),
+				m[2],
+				m[3].split(/,/),
+				get_color(m[4])
+			];
+		}
+		
+		all_courses.push(a);
+	}
+	
+	T["analyze_course_list::all_courses"] = all_courses;
+	T["fetch_all_courses::index"] = 0;
+	
+	fetch_all_courses();
+}
+
+// just fetch all course information, if missed.
+function fetch_all_courses() {
+	after_done = null;
+	locked = false;
+
+	if (T["fetch_all_courses::index"] >= T["analyze_course_list::all_courses"].length) {
+		setTimeout("analyze_course_list_2();", 0);
+	} else {
+		var a = T["analyze_course_list::all_courses"][T["fetch_all_courses::index"]++];
+
+		if (a[0] == "Course" && !(a[1] in courses)) {
+			var the_dept = a[1].substr(0,4).toLowerCase();
+			after_done = fetch_all_courses;
+			get_department_1(the_dept);
+		} else
+			setTimeout("fetch_all_courses()", 0);
+	}
+}
+
+// convert version-1 style sections into version-2 sids.
+function analyze_course_list_2() {
+	for (var i = T["analyze_course_list::all_courses"].length-1; i >= 0; --i) {
+		var a = T["analyze_course_list::all_courses"][i];
+		if (a[0] == "Course" && a[3].length != 0 && a[3][0] != "" && a[3][0].substr(0,2) != "**" && a[3][0].indexOf("`") == -1) {
+			var re_target_section = new RegExp("(?:^|`)0*" + a[3][0].replace(/\./g, '`+') + "(?:`|$)", 'i');
+			var sids = [];
+			for (var j in courses[a[1]].sections) {
+				if (re_target_section.test(j))
+					sids.push(j);
+			}
+			a[3] = sids;
+		}
+	}
+	
+	analyze_course_list_3();
+}
+
+// convert our data into the enrolled_courses array.
+function analyze_course_list_3() {
+	enrolled_courses = [];
+	
+	for (var i = T["analyze_course_list::all_courses"].length-1; i >= 0; --i) {
+		var a = T["analyze_course_list::all_courses"][i];
+		if (a[0] == "Course") {
+			if (a[1] in courses) {
+				var ec = new EnrolledCourse(a[1], a[4], a[2]=='+', a[2]=='*')
+				ec.sections = a[3];
+				ec.makeEquivalentTimeslots();
+				enrolled_courses.push(ec);
+			}
+		} else {			// if == TimeBlock
+			var tb = new TimeBlock(a[1], a[5], a[2], a[3], a[4]);
+			enrolled_courses.push(tb);
+		}
+	}
+
+	enrolled_courses.sort(EnrolledCourse.compare);
+	
+	update_enrolled_courses_hash();
+	update_enrolled_courses();
+	
+	var radios = $CL.getElementsByTagName('input');
+	if (radios.length) {
+		radios[0].checked = true;
+		radios[0].onclick();
+	}
+	
+	W();
+}
+
+//--------------------------------------------
+
+var highlight_timeout = null;
+var cwt_rule = null, cwt_col_rule = null, cwt_enr_rule = null;
+
+{
+	if (document.styleSheets) {
+		var CSSRules = null;
+		if (document.styleSheets[0].cssRules)
+			CSSRules = document.styleSheets[0].cssRules;
+		else if (document.styleSheets[0].rules)
+			CSSRules = document.styleSheets[0].rules;
+		if (CSSRules) {
+			for (var i = CSSRules.length-1; i >= 0; --i) {
+				switch (CSSRules[i].selectorText.toLowerCase()) {
+					case "#course_waitlist_table":
+						cwt_rule = CSSRules[i];
+						break;
+					case "#course_waitlist_table .course_collision_indicator":
+						cwt_col_rule = CSSRules[i];
+						break;
+					case "#course_waitlist_table .course_enrolled_indicator":
+						cwt_enr_rule = CSSRules[i];
+						break;
+					default:
+						break;
+				}
+			}
+		}
+	}
+}
+
+function highlight_waitlist_row () {
+	if (highlight_timeout)
+		clearTimeout(highlight_timeout);
+
+	var $T = $('wait:' + getText(this));
+	$T.className = 'highlighted';
+	cwt_rule.style.color = 'silver';
+	cwt_col_rule.style.color = '#F0D0D0';
+	cwt_enr_rule.style.color = '#D0E0D0';
+
+	// change the scrollTop instead of scrollInfoView() to prevent involuntary scrolling of the whole viewport.
+	$T.parentNode.parentNode.parentNode.scrollTop = $T.offsetTop -  2 * $T.offsetHeight;
+	//$('main_table').scrollIntoView();
+}
+
+function recover_waitlist_row () {
+	$('wait:' + getText(this)).className = '';
+	recover_waitlist_row_2(192);
+}
+
+function recover_waitlist_row_2 (grayness) {
+	var gray64 = 64+grayness*0.75;
+
+	cwt_rule.style.color = 'rgb(' + [grayness,grayness,grayness].join(',') + ')';
+	cwt_col_rule.style.color = 'rgb(' + [192+grayness*0.25, gray64, gray64].join(',') + ')';
+	cwt_enr_rule.style.color = 'rgb(' + [gray64, 128+grayness*0.5, gray64].join(',') + ')';
+	
+	if (grayness > 0)
+		highlight_timeout = setTimeout("recover_waitlist_row_2(" + (grayness-16) + ");", 50);
+}
+
+//---------------------------------
+
+function get_random_bgc () {
+	return num_to_color(Math.random()*0x1000000 >>> 0);
+}
+
+function get_color (color_name) {
+	var colors = {
+        aliceblue: "#f0f8ff", antiquewhite: "#faebd7", aqua: "#00ffff", aquamarine: "#7fffd4", azure: "#f0ffff", beige: "#f5f5dc", bisque: "#ffe4c4", black: "#000000",
+		blanchedalmond: "#ffebcd", blue: "#0000ff", blueviolet: "#8a2be2", brown: "#a52a2a", burlywood: "#deb887", cadetblue: "#5f9ea0", chartreuse: "#7fff00", chocolate: "#d2691e", 
+		coral: "#ff7f50", cornflowerblue: "#6495ed", cornsilk: "#fff8dc", crimson: "#dc143c", cyan: "#00ffff", darkblue: "#00008b", darkcyan: "#008b8b", 
+		darkgoldenrod: "#b8860b", darkgray: "#a9a9a9", darkgreen: "#006400", darkkhaki: "#bdb76b", darkmagenta: "#8b008b", darkolivegreen: "#556b2f", darkorange: "#ff8c00", 
+		darkorchid: "#9932cc", darkred: "#8b0000", darksalmon: "#e9967a", darkseagreen: "#8fbc8f", darkslateblue: "#483d8b", darkslategray: "#2f4f4f", darkturquoise: "#00ced1", 
+		darkviolet: "#9400d3", deeppink: "#ff1493", deepskyblue: "#00bfff", dimgray: "#696969", dodgerblue: "#1e90ff", feldspar: "#d19275", firebrick: "#b22222", 
+		floralwhite: "#fffaf0", forestgreen: "#228b22", fuchsia: "#ff00ff", gainsboro: "#dcdcdc", ghostwhite: "#f8f8ff", gold: "#ffd700", goldenrod: "#daa520", gray: "#808080",
+		green: "#008000", greenyellow: "#adff2f", honeydew: "#f0fff0", hotpink: "#ff69b4", indianred : "#cd5c5c", indigo : "#4b0082", ivory: "#fffff0", khaki: "#f0e68c", 
+		lavender: "#e6e6fa", lavenderblush: "#fff0f5", lawngreen: "#7cfc00", lemonchiffon: "#fffacd", lightblue: "#add8e6", lightcoral: "#f08080", lightcyan: "#e0ffff", 
+		lightgoldenrodyellow: "#fafad2", lightgrey: "#d3d3d3", lightgreen: "#90ee90", lightpink: "#ffb6c1", lightsalmon: "#ffa07a", lightseagreen: "#20b2aa", 
+		lightskyblue: "#87cefa", lightslateblue: "#8470ff", lightslategray: "#778899", lightsteelblue: "#b0c4de", lightyellow: "#ffffe0", lime: "#00ff00", limegreen: "#32cd32", 
+		linen: "#faf0e6", magenta: "#ff00ff", maroon: "#800000", mediumaquamarine: "#66cdaa", mediumblue: "#0000cd", mediumorchid: "#ba55d3", mediumpurple: "#9370d8", 
+		mediumseagreen: "#3cb371", mediumslateblue: "#7b68ee", mediumspringgreen: "#00fa9a", mediumturquoise: "#48d1cc", mediumvioletred: "#c71585", midnightblue: "#191970", 
+		mintcream: "#f5fffa", mistyrose: "#ffe4e1", moccasin: "#ffe4b5", navajowhite: "#ffdead", navy: "#000080", oldlace: "#fdf5e6", olive: "#808000", olivedrab: "#6b8e23", 
+		orange: "#ffa500", orangered: "#ff4500", orchid: "#da70d6", palegoldenrod: "#eee8aa", palegreen: "#98fb98", paleturquoise: "#afeeee", palevioletred: "#d87093", 
+		papayawhip: "#ffefd5", peachpuff: "#ffdab9", peru: "#cd853f", pink: "#ffc0cb", plum: "#dda0dd", powderblue: "#b0e0e6", purple: "#800080", red: "#ff0000", 
+		rosybrown: "#bc8f8f", royalblue: "#4169e1", saddlebrown: "#8b4513", salmon: "#fa8072", sandybrown: "#f4a460", seagreen: "#2e8b57", seashell: "#fff5ee", sienna: "#a0522d", 
+		silver: "#c0c0c0", skyblue: "#87ceeb", slateblue: "#6a5acd", slategray: "#708090", snow: "#fffafa", springgreen: "#00ff7f", steelblue: "#4682b4", tan: "#d2b48c", 
+		teal: "#008080", thistle: "#d8bfd8", tomato: "#ff6347", turquoise: "#40e0d0", violet: "#ee82ee", violetred: "#d02090", wheat: "#f5deb3", white: "#ffffff", 
+		whitesmoke: "#f5f5f5", yellow: "#ffff00", yellowgreen: "#9acd32"
+    };
+    
+    color_name = color_name.toLowerCase();
+    
+	if (/^\#[0-9a-f]{6}$/.test(color_name))
+		return color_name;
+	else if (color_name in colors)
+		return colors[color_name];
+	else {
+		color_name = color_name.replace(/[^0-9a-f]/g,'');
+		if (color_name.length >= 6)
+			return '#' + color_name.substr(0,6);
+		else if (color_name.length == 3)
+			return "#" + color_name.charAt(0) + color_name.substr(0,2) + color_name.substr(1,2) + color_name.charAt(2);
+		else
+			return "#000000";
+	}
+}
+
+function update_color_demo (color) {
+	if ("string" != typeof color) {
+		color = get_random_bgc();
+	} else {
+		color = get_color(color);
+	}
+	
+	var fgc = getTextColorFromBG(color);
+	
+	$BGC.style.backgroundColor = color;
+	$BGC.style.color = fgc;
+}
+
+$BGC.onchange = $BGC.onkeyup = function (e) { update_color_demo(this.value); }
+$BGC.onblur = function (e) {
+	this.value = this.style.backgroundColor;
+	var m = this.value.match(/^rgb\((\d+), (\d+), (\d+)\)$/);
+	if (m) {
+		this.value = '#' + pad((m[1] << 16 | m[2] << 8 | m[3]).toString(16), 6);
+	}
+}
+function RCclick(e) { var clr = get_random_bgc(); update_color_demo(clr); $BGC.value = clr; }; 
+$('rand_color').onclick = RCclick;
+
+$('randomize_bgc').onclick = function () {
+	var radios = $CL.getElementsByTagName('input');
+	var id = "";
+	for (var i = enrolled_courses.length-1; i >= 0; -- i) {
+		backgroundColors[enrolled_courses[i].code] = enrolled_courses[i].bgcolor = get_random_bgc();
+		if (radios[i].checked)
+			id = radios[i].id;
+	}
+	
+	if (id) {
+		update_enrolled_courses();
+		$(id).checked = true;
+		$(id).onclick();
+	}
+}
+
+$('set_brighter').onclick = function () {
+	$BGC.value = brighter($BGC.value);
+	$BGC.onchange();
+}
+
+
+$('set_darker').onclick = function () {
+	$BGC.value = darker($BGC.value);
+	$BGC.onchange();
+}
+
+//---------------------------------
+
+function enroll_course () {
+	var code;
+	var required = $RC.checked;
+	var audit = $AC.checked;
+	var color = $BGC.value;
+	var ec;
+
+	if (!isTBMode) {
+		code = normalize_course_code($CC.value);
+
+		var dept = code.substr(0, 4).toLowerCase();
+		if (!(dept in departments)) {
+			after_done = enroll_course;
+			get_department_1(dept);
+			return;
+		}
+		
+		if (!(code in courses)) {
+			W(M.NoSuchCourse(code), true, true);
+			return;
+		} else {
+			ec = new EnrolledCourse(code, color, required, audit);
+			
+			var checkboxes = $PrefSectTable.getElementsByTagName('input');
+			for (var i = checkboxes.length - 1; i >= 0; --i) {
+				if (checkboxes[i].checked) {
+					var sid = checkboxes[i].id.substr(5);
+					ec.sections.push(sid);
+				}
+			}
+		}
+	
+	} else {
+	
+		var title = $CC.value;
+		var days = [];
+		
+		for (var wd = 0; wd < 7; ++ wd) {
+			if ($('tb:w' + wd).checked)
+				days.push(wd);
+		}
+		
+		if (days.length == 0) {
+			days = [0, 1, 2, 3, 4];
+		}
+				
+		ec = new TimeBlock(title, color, days, $('tb:begin').selectedIndex, $('tb:end').selectedIndex);
+		
+		code = ec.code;
+	
+	}
+	
+	// make the equivalent timeslots.
+	ec.makeEquivalentTimeslots();
+	
+	// if the course already exists, replace it instead of create a new copy.
+	var isReplaced = false;
+	if (code in enrolled_courses_hash) {
+		enrolled_courses[enrolled_courses_hash[code]] = ec;
+		isReplaced = true;
+	}
+	
+	if (!isReplaced) {
+		enrolled_courses.push(ec);
+		enrolled_courses.sort(EnrolledCourse.compare);
+		update_enrolled_courses_hash();
+	}
+	
+	update_enrolled_courses();
+
+	var myRadio = $('enr_' + code);
+	if (!myRadio) {
+		var radios = $CL.getElementsByTagName('input');
+		myRadio = radios[radios.length-1];
+	}
+	if (myRadio) {
+		myRadio.checked = true;
+		myRadio.onclick();
+	}
+	
+	after_done = null;
+	locked = false;
+	W();
+	
+	// generate random color.
+	RCclick();
+}
+
+function update_enrolled_courses() {
+	var eclen = enrolled_courses.length;
+
+	var revertETS = CurrentETS.clone();
+
+	// compute the current total ets.
+	CurrentETS = new Equivalent_Timeslots();
+	var ElectiveETS  = new Equivalent_Timeslots();
+	var wasElective = false;
+	var failure = "";
+	var j;
+	var failureCourseIndex, failureCourseCode;
+	
+	for (j = 0; j < eclen; ++ j) {
+		var course = enrolled_courses[j];
+		var et = course.equivalent_timeslots;
+		
+		if (et._.length) {
+			if (course.required)
+				CurrentETS.multiply(et);
+			else if (course.audit) {
+				if (wasElective) {
+					wasElective = false;
+					CurrentETS.combine(ElectiveETS);
+					ElectiveETS = {_:[]};
+				}
+				CurrentETS.multiply_audit(et);
+			} else {
+				ElectiveETS.combine_ignore(et);
+				wasElective = true;
+			}
+		}
+		
+		if (CurrentETS._.length + ElectiveETS._.length == 0) {
+			CurrentETS = revertETS;
+			failure = "conflict";		// conflict should be detected and reverted on first encounter.
+			failureCourseIndex = j;
+			failureCourseCode = enrolled_courses[j].code;
+			break;
+		} else if ((1 + CurrentETS._.length) * (1 + ElectiveETS._.length) >= 1000) {
+			failure = "too much";
+			break;
+		}
+	}
+	
+	if (!failure) {
+		if (wasElective)
+			CurrentETS.combine(ElectiveETS);
+	}
+	
+	if (failure == "conflict") {
+		-- eclen;
+		enrolled_courses.splice(failureCourseIndex, 1);
+		update_enrolled_courses_hash();
+	}
+	
+	$ST.disabled = (failure == "too much");
+	$ST.value = "⊞ × " + (failure == "too much" ? "≳" : "") + CurrentETS._.length;
+	$ST._title = "Show " + CurrentETS._.length + " timetable" + (CurrentETS._.length != 1 ? "s" : "");
+	
+	// create HTML of course lst.
+	var src = [];
+	for (i = 0; i < eclen; ++ i)
+		src.push (enrolled_courses[i].toHTML());
+	
+	$CL = setInnerHTML($CL, cc_id(src.join(''), true));
+	upgrade_tooltiptext($CL);
+	
+	// assign the event handlers
+	for (i = 0; i < eclen; ++ i) {
+		var $elem = $('enr_' + unescapeHTML(enrolled_courses[i].code));
+		$elem.ec_index = i;
+		$elem.onclick = select_this_course;
+	}
+	
+	if (failure == "conflict") {
+		W(M.SingleConflict(failureCourseCode), true, true);
+	} else if (failure == "too much") {
+		W(M.TooManyPossibilities(
+			enrolled_courses[j].code,
+			(1 + CurrentETS._.length) * (1 + ElectiveETS._.length) - 1),
+		true, true);
+	}
+	
+	// save the course list to cookie.
+	var nextyear = new Date();
+	nextyear.setFullYear(nextyear.getFullYear() + 1);
+
+	document.cookie = "courselist=" + encodeURIComponent(get_course_list_code(true)) + ";expires=" + nextyear.toUTCString();
+}
+
+function select_this_course (e) {
+	var index = this.ec_index;
+	var ec = enrolled_courses[index];
+	var course_code = ec.code;
+	
+	var selected_timeblock = course_code.charAt(0) == '!';
+	if (selected_timeblock != isTBMode)
+		switch_mode();
+	
+	if (!selected_timeblock) {
+		
+		$RC.checked = ec.required;
+		$AC.checked = ec.audit;
+		go_to_course(course_code);
+		
+		// check all the selected sections.
+		var sel_sects = ec.sections;
+		for (var i = sel_sects.length-1; i >= 0; -- i) {
+			$('sect:' + sel_sects[i]).checked = true;
+		}
+		
+	} else {
+		
+		$CC.value = $CC.oldValue = unescapeHTML(ec.title);
+		for (var wd = 0; wd < 7; ++ wd)
+			$('tb:w' + wd).checked = false;
+		for (var ds = ec.days.length-1; ds >= 0; --ds)
+			$('tb:w' + ec.days[ds]).checked = true;
+		$('tb:begin').selectedIndex = ec.begin;
+		$('tb:end').selectedIndex = ec.end;
+	
+	}
+	
+	update_color_demo($BGC.value = enrolled_courses[index].bgcolor);
+}
+
+$('add_course').onclick = enroll_course;
+
+function remove_enrolled_course () {
+	// get the selected radio button & remove that selected course.
+	var radios = $CL.getElementsByTagName('input');
+	var i;
+	for (i = radios.length-1; i >= 0; --i) {
+		if (radios[i].checked) {
+			enrolled_courses.splice(i, 1);
+			update_enrolled_courses_hash();
+			break;
+		}
+	}
+	
+	if (i < 0)
+		return;
+
+	if (!T['remove_enrolled_course::dont_update']) {
+		var $which_course_to_reselect;
+		update_enrolled_courses();
+		if (enrolled_courses.length > 0) {
+			if (i == 0)
+				$which_course_to_reselect = $CL.getElementsByTagName('input')[0];
+			else
+				$which_course_to_reselect = $CL.getElementsByTagName('input')[i-1];
+			
+			$which_course_to_reselect.checked = true;
+			$which_course_to_reselect.onclick();
+		}
+	}
+}
+
+$('clear_all_items').onclick = function (e) {
+	if (confirm("You are about to clear all items in the course list.\n\nThis action is not undoable.\n\nAre you sure you want to continue?")) {
+		enrolled_courses = [];
+		enrolled_courses_hash = {};
+		update_enrolled_courses();
+	}
+}
+
+$('remove_course').onclick = remove_enrolled_course;
+$('update_course').onclick = function (e) {
+	T['remove_enrolled_course::dont_update'] = true;
+	remove_enrolled_course();
+	enroll_course();
+	T['remove_enrolled_course::dont_update'] = false;
+}
+
+$RC.onclick = function (e) { if (this.checked) $AC.checked = false; }
+$AC.onclick = function (e) { if (this.checked) $RC.checked = false; }
+
+//---------------------------------
+
+function cc_id (s, dont_idfy) {
+	var re = /([\s\/>]|&nbsp;)([A-Z]{4})(\d{3}[A-Z]?)\/\s*(\d{3}[A-Z]?)(?=[\s,.;\/<]|&nbsp;|$)/g;
+	
+	while (re.test(s)) {
+		s = s.replace(re, "$1$2$3/$2$4");
+		re.lastIndex = 0;					// Fix for IE.
+	}
+
+	return s.replace (/([\s\/>]|&nbsp;)([A-Z]{4})(\d{3}[A-Z]?)(?=[\s,.;\/<]|&nbsp;|$)/g, dont_idfy ? cc_id_plain : cc_idfy);
+	// '$1<span class="cc_id" onclick="go_to_course(\'$2$3\');"><span class="dept_redundant">$2</span>&nbsp;<strong>$3</strong></span>'
+}
+
+function cc_idfy (s, before, dept, num) {
+	var code = dept + num;
+	if (!(code in courses))
+		return before + '<span class="dept_redundant">' + dept + '&#8209;</span><strong>' + num + '</strong>';
+	else
+		return before + '<span title="' + courses[code].title + '" class="cc_id" onclick="go_to_course(\'' + code + '\');">' +
+				try_multiply_course(
+					courses[code].equivalent_timeslots,
+					'<span class="dept_redundant">' + dept + '&#8209;</span><strong>' + num + '</strong>',
+					code,
+					null
+				) + '</span>';
+}
+
+function cc_id_plain (s, before, dept, num) {
+	return before + '<span class="dept_redundant_plain">' + dept + '&#8209;</span><strong>' + num + '</strong>';
+}
+
+function go_to_course (code) {
+	if (isTBMode)
+		switch_mode();
+	
+	$CC.value = $CC.oldValue = code;
+		
+	prepare_course_1(code);
+}
+
+//---------------------------------
+
+var isTBMode = false;
+var TBSRC = "";
+
+{
+	TBSRC = '<tr><th>Days:</th><td><input id="tb:w0" type="checkbox" /></td><td><label for="tb:w0">Monday</label></td></tr>';
+	TBSRC += '<tr><td></td><td><input id="tb:w1" type="checkbox" /></td><td><label for="tb:w1">Tuesday</label></td></tr>';
+	TBSRC += '<tr><td></td><td><input id="tb:w2" type="checkbox" /></td><td><label for="tb:w2">Wednesday</label></td></tr>';
+	TBSRC += '<tr><td></td><td><input id="tb:w3" type="checkbox" /></td><td><label for="tb:w3">Thursday</label></td></tr>';
+	TBSRC += '<tr><td></td><td><input id="tb:w4" type="checkbox" /></td><td><label for="tb:w4">Friday</label></td></tr>';
+	TBSRC += '<tr><td></td><td><input id="tb:w5" type="checkbox" /></td><td><label for="tb:w5">Saturday</label></td></tr>';
+	TBSRC += '<tr><td></td><td><input id="tb:w6" type="checkbox" /></td><td><label for="tb:w6">Sunday</label></td></tr>';
+
+	TBSRC += '<tr><th>Begin:</th><td colspan="2"><select id="tb:begin">';
+	for (var i = -4; i < TimeInterval.starttime.length; ++ i) {
+		var classes = "";
+		if (!(i & 1))
+			classes += "hours ";
+		if (i < 0 || i >= 20)
+			classes += "ext_time";
+		if (classes)
+			classes = 'class="' + classes + '"';
+		
+		if (TimeInterval.starttime[i] == '12:00')
+			TBSRC += '<option ' + classes + ' selected="selected">12:00</option>';
+		else
+			TBSRC += '<option ' + classes + '>' + TimeInterval.starttime[i] + '</option>';
+	}
+	TBSRC += '</select></td></tr>';
+	TBSRC += '<tr><th>End:</th><td colspan="2"><select id="tb:end">';
+	
+	for (var i = -4; i < TimeInterval.endtime.length; ++ i) {
+		var classes = "";
+		if (i & 1)
+			classes += "hours ";
+		if (i < 0 || i >= 20)
+			classes += "ext_time";
+		if (classes)
+			classes = 'class="' + classes + '"';
+	
+			if (TimeInterval.endtime[i] == '12:50')
+			TBSRC += '<option ' + classes + ' selected="selected">12:50</option>';
+		else
+			TBSRC += '<option ' + classes + '>' + TimeInterval.endtime[i] + '</option>';
+	}
+	TBSRC += '</select></td></tr>';
+}
+
+function switch_mode () {
+	isTBMode = !isTBMode;
+
+	$('mode_label').innerHTML = isTBMode ? 'Title:' : 'Course:';
+	$('switch_mode_button')._title = isTBMode ? 'Switch to Course mode' : 'Switch to TimeBlock mode';
+	$('confirm_cc').disabled = isTBMode;
+	$RC.disabled = isTBMode;
+	$AC.disabled = isTBMode;
+	$RC.checked = true;
+	$AC.checked = false;
+	
+	$CC.value = $CC.oldValue = "";
+	
+	if (isTBMode) {
+		$PrefSectTable = setInnerHTML($PrefSectTable, TBSRC);
+	} else {
+		clearTable($PrefSectTable);
+	}
+}
+
+$('switch_mode_button').onclick = switch_mode;
+
+//---------------------------------
+
+function showETS () {
+	var src = ['<table class="combin_table"><tr>'];
+	var etslen = CurrentETS._.length;
+	
+	if (etslen == 0 || etslen > 1000)
+		return;
+	
+	for (var i = 0; i < etslen; ++ i) {
+		var ets = CurrentETS._[i];
+		
+		src.push('<td class="combin_timetable_cell">' + ets.toHTML(false) + '</td>');
+		src.push('<td class="desc_text">');
+		
+		var cr = 0;
+		
+		for (var j in ets.sids) {
+			if (j.charAt(0) == '!')
+				src.push('■');
+			else if (auditing[j])
+				src.push('∗');
+			else if (!requiring[j])
+				src.push('−');
+			else
+				src.push('+');
+		
+			src.push(' <span style="background-color:' + backgroundColors[j] + ';color:' + getTextColorFromBG(backgroundColors[j]) + ';border:1px solid ' + darker_mul(backgroundColors[j]) + ';" class="cb_course_code"');
+			if (j.charAt(0) != '!') {
+			
+				src.push(cc_id('>' + j, true) + '</span> ');
+			
+				var arr = ets.sids[j].clone();
+				var arrlen = arr.length;
+				
+				for (var k = 0; k < arrlen; ++ k)
+					arr[k] = Section.sidToString(arr[k]);
+				
+				src.push(arr.join('/') + '<br />');
+				
+				if (!auditing[j])
+					cr += courses[j].vector.credits;
+			
+			} else {
+				src.push('>' + ets.sids[j] + '</span><br />');
+			}
+			
+		}
+
+		src.push('<input type="button" class="detail_button" value="↥" title="Set as course list." onclick="set_as_course_list(' + i + ');" /><br />');
+		src.push('(' + cr + ' credits)');
+		src.push('<input type="button" class="detail_button" value="↗" title="View detailed timetable in new window." onclick="display_detailed_timetable(' + i + ');" />');
+		src.push('<input type="button" class="detail_button" value="➲" title="Transfer to Timetable Assistant." onclick="transfer_timetable_to_tta(' + i + ');" />');
+		src.push('</td>');
+
+		if ((i & 3) == 3) {
+			if (i == etslen-1)
+				src.push('</tr>');
+			else
+				src.push('</tr><tr>');
+		}
+	}
+	
+	while (etslen & 3) {
+		src.push('<td>&nbsp;</td><td>&nbsp;</td>');
+		++etslen;
+	}
+	
+	src.push('</table>');
+	
+	$R.innerHTML = src.join('');
+	
+	upgrade_tooltiptext($R);
+}
+
+$ST.onclick = showETS;
+
+function get_detailed_timetable_css (width) {
+	return '\x3Cstyle type="text/css" media="all">' + 
+		'/*\x3C![CDATA[*/' +
+		'.detailed_table{font-family:"Palatino Linotype","Book Antiqua",palatino,times,serif;width:100%;border:3px double #000;border-collapse:collapse;}.detailed_table th{border:1px solid #000;width:10%;}.detailed_table td{border:1px solid silver;text-align:center;vertical-align:middle;width:'+(90/width)+'%;}.detailed_table em{font-family:"Georgia",times,serif;}.filled{color:#FFF;border:2px solid black !important;}.audit_container{position:\\72 elative;width:100%;vertical-align:middle;}.audit_text{position:\\61 bsolute;left:0;top:-0.5em;font-variant:small-caps;font-size:75%;}.even_row{font-weight:400;}.audit strong{font-style:italic;}' +
+		'/*]' + ']>*/' +
+		'\x3C/style>';
+}
+
+var detailed_timetable_css_extra = '\x3Cstyle type="text/css" media="all">' + 
+		'/*\x3C![CDATA[*/' +
+		'.detail { text-align: center; font-family: "Palatino Linotype", "Book Antiqua", palatino, times, serif; margin-top: 5em; }' +
+		'/*\]' + ']>*/' +
+		'\x3C/style>' +
+		'\x3Cstyle type="text/css" media="print">' +
+		'/*\x3C![CDATA[*/' +
+		'.detail { display: none; }' +
+		'/*\]' + ']>*/' +
+		'\x3C/style>';
+
+var detailWindow = null;
+function display_detailed_timetable (i) {
+	var a = CurrentETS._[i];
+	
+	if (detailWindow && ('closed' in detailWindow) && !detailWindow.closed)
+		detailWindow.close();
+	
+	detailWindow = window.open('', 'new_tt_win');
+	
+	var d = detailWindow.document;
+	var s = a.toHTML(true);
+	
+	var css = get_detailed_timetable_css (5+a.has_saturday+a.has_sunday);
+	
+	//d.open('application/xhtml+xml');
+	d.open('text/html');	// currently only text/html is supported.
+	d.writeln('\x3C!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">');
+	d.writeln('\x3Chtml xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">');
+	d.writeln('\x3Chead>');
+	d.writeln('\x3Cmeta http-equiv="Content-Type" content="application/xhtml+xml; charset=utf-8" />');
+	d.writeln('\x3Ctitle>Timetable #' + i + '\x3C/title>');
+	d.writeln( css );
+	d.writeln(detailed_timetable_css_extra);
+	d.writeln('\x3C/head>\x3Cbody>');
+	d.writeln( s );
+	d.writeln('\x3Cform class="detail" action="" method="get">');
+	d.writeln('\x3Cp>HTML source code \x3Cinput type="button" value="Copy" id="copy" /> \x3C/p>');
+	d.writeln('\x3Cp>\x3Ctextarea id="source_code" style="width:100%" rows="7" cols="100">');
+	d.writeln( escapeHTML(s) );
+	d.writeln( escapeHTML(css) );
+	d.writeln('\x3C/textarea>\x3C/p>');
+	d.writeln('\x3C/form>');
+	d.writeln('\x3Cscript type="text/javascript">');
+	d.writeln('/*\x3C![CDATA[*/');
+	d.writeln('var $SC = document.getElementById("source_code");');
+	d.writeln('$SC.onfocus = function(){ this.select(); }');
+	d.writeln('document.getElementById("copy").onclick = function () {');
+	d.writeln('  $SC.select();');
+	d.writeln('  if (window.clipboardData)');
+	d.writeln('    window.clipboardData.setData("Text", $SC.value);');
+	d.writeln('  else {');
+	d.writeln('    var FC = "flashcopier";');
+	d.writeln('    if(!document.getElementById(FC)) {');
+	d.writeln('      var $FC = document.createElement("div");');
+	d.writeln('      $FC.id = FC;');
+	d.writeln('      document.body.appendChild($FC);');
+	d.writeln('    }');
+	d.writeln('    document.getElementById(FC).innerHTML = "";');
+	d.write('    var DI = "<embed src=\'http://webchicanery.com/code/_clipboard.swf\'');
+	d.writeln(' FlashVars=\'clipboard="+encodeURIComponent($SC.value)+"\' width=\'0\' height=\'0\' type=\'application/x-shockwave-flash\'></embed>";');
+	d.writeln('    document.getElementById(FC).innerHTML = DI;');
+	d.writeln('  }');
+	d.writeln('}');
+	d.writeln('/*]' + ']>*/');
+	d.writeln('\x3C/script>');
+	d.writeln('\x3C/body>\x3C/html>');
+	d.close();
+}
+
+//---------------------------------
+
+var TTAWindow = null;
+
+function transfer_timetable_to_tta_action () {
+	TTAWindow.location = T["transfer_timetable_to_tta::url"];
+	TTAWindow.focus();
+}
+
+function transfer_timetable_to_tta(index) {
+	if (locked || being_disabled)
+		return;
+
+	var xml = ['<timetable><title>Timetable #' + index + '</title><courses>'];
+	
+	var sids = CurrentETS._[index].sids;
+	
+	for (var code in sids) {
+		if (code.charAt(0) != "!") {
+			xml.push('<course><courseCode>' + code + '</courseCode>');
+			var a = Section.sidToArray(sids[code][0]);
+			if (a[0]) xml.push('<L>' + a[0] + '</L>');
+			if (a[1]) xml.push('<T>' + a[1] + '</T>');
+			if (a[2]) xml.push('<LA>' + a[2] + '</LA>');
+			xml.push('<color>' + (('0x'+backgroundColors[code].substr(1))>>>0) + '</color>');
+			xml.push('</course>');
+		}
+	}
+	
+	xml.push('</courses></timetable>');
+	
+	T["transfer_timetable_to_tta::url"] = 'https://w1.ab.ust.hk/jr_ta/updateSession?actionType=loadWebCR&xml=' + encodeURIComponent(xml.join(""));
+	
+	TTAWindow = window.open('https://w1.ab.ust.hk/jr_ta/login', 'tta_win');
+	setTimeout("transfer_timetable_to_tta_action()", 1000);
+}
+
+function set_as_course_list(index) {
+	var sids = CurrentETS._[index].sids;
+	
+	for (var i = enrolled_courses.length-1; i >= 0; --i) {
+		if (enrolled_courses[i] instanceof EnrolledCourse) {
+			enrolled_courses[i].sections = sids[enrolled_courses[i].code].clone();
+			enrolled_courses[i].makeEquivalentTimeslots();
+		}
+	}
+	
+	update_enrolled_courses_hash();
+	update_enrolled_courses();
+	
+	var radios = $CL.getElementsByTagName('input');
+	if (radios.length) {
+		radios[0].checked = true;
+		radios[0].onclick();
+	}
+}
+
+//---------------------------------
+
+function init_course_lists() {
+	var saved_course_list = document.cookie.match(/courselist=([^;]+)/);
+	if (saved_course_list) {
+		analyze_course_list_1(decodeURIComponent(saved_course_list[1]));
+	} 
+	W();
+}
+
+//---------------------------------
+
+function hashMonitor () {
+	if (locked || being_disabled)
+		return;
+
+	var m = location.hash.match(/course:(\w+)/i);
+	var code = "";
+	
+	if (m) {
+		code = m[1];
+	} else
+		return;
+
+	if (code != currentPage) {
+		if (isTBMode)
+			switch_mode();
+		$CC.value = $CC.oldValue = currentPage = code;
+		prepare_course_1();
+	}
+}
+
+//---------------------------------
+
+// $Y -> 2007
+// $n -> spring
+// $N -> Spring
+// $S -> 3
+// $R -> 2008 (real year)
+// $y -> 07
+// $t -> 08
+// $T -> 2008
+var useful_links = '<ul>' +
+		'<li><strong><a href="https://www.ab.ust.hk/cgi-bin/std_rg_cgi.sh/WService=broker_ct_p/prg/cr_rg_summ.r?p_stdt_id=xxxxxxxx&amp;p_reg_yr=$Y&amp;p_reg_semes_cde=$S" onclick="var stdid=prompt(\'Please enter your student ID:\', \'01234567\');window.open(\'https://www.ab.ust.hk/cgi-bin/std_rg_cgi.sh/WService=broker_ct_p/prg/cr_rg_summ.r?p_stdt_id=\' + stdid + \'&amp;p_reg_yr=$Y&amp;p_reg_semes_cde=$S\');return false;" target="_new">Preview pre-registered courses</a></strong></li>' +
+		'<li><strong><a href="http://www.bm.ust.hk/bba/timetable/$R$n_hss.htm" target="_new">HUMA/SOSC timetable, provided by SBM</a></strong></li>' +
+		'<li><a href="http://www.bm.ust.hk/bba/timetable/$R$n.htm" target="_new">BBA major timetable, provided by SBM</a></li>' +
+		'<li><a href="http://www.ust.hk/~webaa/courseval/index.html" target="_new">Course Evaluation Results</a></li>' +
+		'<li>Course-related administrative services:<ul>' + 
+			'<li><a href="https://w1.ab.ust.hk/jr_ta/login" target="_new">(Official) Time Table Assistant</a></li>' + 
+			'<li><a href="https://www.ab.ust.hk/cgi-bin/std_rg_cgi.sh/WService=broker_ct_p/prg/cr_reg_main.r" target="_new">Course registration / enrollment</a></li>' + 
+			'<li><a href="https://www.ab.ust.hk/cgi-bin/std_cgi.sh/WService=broker_ph_p/prg/ph_sd_main_menu.r" target="_new">HLTH-001</a></li>' + 
+			'<li><a href="https://www.ab.ust.hk/cgi-bin/std_cgi.sh/WService=broker_sq_p/prg/sq_stdt_armain.r" target="_new">Academic Record</a></li>' + 
+			'<li><a href="https://www.ab.ust.hk/cgi-bin/std_cgi.sh/WService=broker_sq_p/prg/sq_stdt_Prgsmain.r" target="_new">Degree Progress Tracking</a></li>' + 
+		'</ul></li>' +
+		'<li>Academic calendar:<ul>' +
+			'<li><a href="http://publish.ust.hk/univ/cal$y$t/calendar/course/cover/index.html" target="_new">Course Catalog</a></li>' + 
+			'<li><a href="http://publish.ust.hk/univ/cal$y$t/calendar/ugprogram/cover/index.html" target="_new">UG Programs</a></li>' + 
+		'</ul></li>' +
+/*		'<li>Tentative course lists of individual departments:<ul>' +
+			'<li><a href="http://www.ece.ust.hk/undergrad/undergrad_course_offer_$y$t.pdf" target="_new">ECE</a>' +
+			'<li><a href="http://www.bm.ust.hk/~econ/course/$y-$t.htm" target="_new">ECON</a>' +
+			'<li><a href="http://www.ust.hk/~webhuma/$N_ug_course_$R.html" target="_new">HUMA</a>' +
+			'<li><a href="http://www.math.ust.hk/whatisnew.php" target="_new">MATH</a>' +
+		'</ul></li>' +*/
+		'<li>Online forums/newsgroups:<ul>' +
+			'<li><a href="http://www.miniforum.org/showtopic.fcgi?FID=69&amp;page=1&amp;tempid=2" target="_new">Miniforum.org</a></li>' +
+			'<li><a href="http://www.discuss.com.hk/forumdisplay.php?fid=197" target="_new">Discuss.com.hk</a></li>' +
+			'<li><a href="http://www.uwants.com/forumdisplay.php?fid=555" target="_new">UWants</a></li>' +
+		'</ul></li>' +
+		'<li><a href="https://www.ab.ust.hk/arr/reg/cr/cr_std_ug/regug_rn_time.pdf" target="_new">Course registration schedule</a></li>' +
+		'<li><a href="https://www.ab.ust.hk/arr/reg/cr/cr_std_schedule/changes.htm" target="_new">Recent course changes</a></li>' +
+	'</ul>';
+
+
+$('get_useful_links').onclick = function (e) {
+	var a = get_sem_info();
+	
+	var from = pad(a[0]%100,2);
+	var to = pad((a[0]+1)%100,2);
+	
+	$R.innerHTML = useful_links
+		.replace(/\$Y/g, a[0])
+		.replace(/\$N/g, a[2])
+		.replace(/\$S/g, a[1])
+		.replace(/\$n/g, a[2].toLowerCase())
+		.replace(/\$R/g, a[3])
+		.replace(/\$y/g, from)
+		.replace(/\$t/g, to)
+		.replace(/\$T/g, a[0]+1);
+}
+$('get_standard_response').onclick = function (e) {
+	$R.innerHTML = standard_response;
+}
+
+//---------------------------------
+
+
+if (window.width < 1024 && screen.width > window.width)
+	window.resizeTo(Math.min(1024, screen.width), window.height);
+
+upgrade_tooltiptext(document);
+
+IX();
+
+$CC.setAttribute('autocomplete', 'off');	// shut-off Gecko's XULElement.selectedIndex
+
+$CC.value = "PHYS";
+$CC.oldValue = $CC.value;
+
+init_lifts();
+
+setInterval(hashMonitor, 300);
+
+
+//]]>
+</script>
+
+</body>
+
+</html>
