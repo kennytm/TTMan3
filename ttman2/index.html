@@ -2320,16 +2320,6 @@ function Course (courseTitle) {
 	this.title = courseTitle[1];
 	this.vector = new Vector(courseTitle[2]);
 	
-	this.matchingRules = 0;
-	if (courseTitle.length > 3 && courseTitle[3].indexOf('matching') != -1) {
-		if (courseTitle[3].indexOf('lecture') != -1)
-			this.matchingRules |= 1;
-		if (courseTitle[3].indexOf('tutorial') != -1)
-			this.matchingRules |= 2;
-		if (courseTitle[3].indexOf('laboratory') != -1)
-			this.matchingRules |= 4;
-	}
-	
 	this.sections = {};
 	this.subsections = {L:{},T:{},LA:{},R:{}};
 	this.additionalWaitlists = {L:0,T:0,LA:0,R:0};
@@ -2369,8 +2359,6 @@ function Course (courseTitle) {
                             var matched = true;
                             for (var constraint_sect_type_index = 0; constraint_sect_type_index < sect_type_index; ++ constraint_sect_type_index) {
                                 var constraint_sect_type = ALLTYPES[constraint_sect_type_index];
-                                if ((1 << constraint_sect_type_index | 1 << sect_type_index) & ~this.matchingRules)
-                                    continue;
                                 if (Subsection.isMatch(ssid, sect2[constraint_sect_type]))
                                     continue;
                                 matched = false;
@@ -2422,20 +2410,13 @@ function Subsection (code, origssid, type, number, letter, group, quota, enroll,
 	this.remarks = "";
 }
 
-Subsection.isMatch = function (ssid1, ssid2) {
-	/*if (ssid1 == ssid2)
-		return true;
-	else {
-		var letter1 = ssid1.search(/[A-Z]/i);
-		var letter2 = ssid2.search(/[A-Z]/i);
-		if (letter1 < 0 && letter2 >= 0)
-			return ssid1 == ssid2.substr(0, letter2);
-		else if (letter1 >= 0 && letter2 < 0)
-			return ssid2 == ssid1.substr(0, letter1);
-		else
-			return false;
-	}*/
-	return ssid1.replace(/[A-Z]/ig, '') == ssid2.replace(/[A-Z]/ig, '');
+Subsection.isMatch = function (ssid1, ssid2) {    
+    letters_re = /[A-Z]/ig;
+    var res = true;
+    if (ssid2 && (letters_re.test(ssid1) || letters_re.test(ssid2)))
+        res = ssid1.replace(letters_re, '') == ssid2.replace(letters_re, '');
+    //console.log("matching <", ssid1, "> and <", ssid2, "> = ", res);
+    return res;
 }
 
 function Section(newsubsection, course_code) {
