@@ -2801,8 +2801,8 @@ function get_department_3ut() {
 
     // compute the last update time.
     var dept = new Department;
-    var last_update_text = getText($TTA.querySelector('.lastupdate'));
-    dept.lastUpdate = new Date(last_update_text.replace("Last Update:", new Date().getFullYear()));
+    var last_update_text = getText($TTA.querySelector('.topline'));
+    dept.lastUpdate = new Date(new Date().getFullYear() + last_update_text.match(/Last Update:(.+)/)[1]);
      
     var course_elems = $TTA.querySelectorAll('.course');
     var course_count = course_elems.length;
