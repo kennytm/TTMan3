@@ -2831,7 +2831,7 @@ function get_department_3ut() {
         //console.log(i, '/', course_count);
 
         var course_title = getText(course_elem.querySelector('h2'));
-        var course_title_parsed = course_title.match(/^([A-Z]+ \d+) - (.+) \((\d+) units?\)$/);
+        var course_title_parsed = course_title.match(/^([A-Z]+ \d+[A-Z]?) - (.+) \((\d+) units?\)$/);
         var course = new Course([course_title_parsed[1].replace(/\W/g, ''),
                                  course_title_parsed[2],
                                  '0-0-0:' + course_title_parsed[3]]);
