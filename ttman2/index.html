@@ -2825,7 +2825,7 @@ function get_department_3ut() {
 
         // try to extract the previous course code as an alternative.
         var prev_course_code_match = raw_course_description.match(/<strong>PREVIOUS CODE<\/strong>: ([^<]+)/);
-        var prev_course_code = prev_course_code_match ? prev_course_code_match[1].replace(/\s/g, '') : null;
+        var prev_course_codes = prev_course_code_match ? prev_course_code_match[1].replace(/\s/g, '').split(/,/) : [];
 
         var rows = course_elem.querySelectorAll('.sections tr');
         var rows_count = rows.length;
@@ -2881,8 +2881,8 @@ function get_department_3ut() {
 
         course.computeSections();
         dept.courses[course.code] = courses[course.code] = course;
-        if (prev_course_code)
-            courses[prev_course_code] = course;
+        console.log(prev_course_codes);
+        prev_course_codes.forEach( function(c) { courses[c] = course; } );
         ++dept.coursesCount; 
     }
 
